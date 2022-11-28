@@ -1,3 +1,4 @@
+import lightning as L
 import abc
 import os
 import shlex
@@ -11,13 +12,14 @@ import numpy as np
 import tritonclient.http as httpclient
 import uvicorn
 from fastapi import FastAPI
-from lightning.app.components.serve.base import ServeBase
 from lightning.app.utilities import safe_pickle
 from lightning.app.utilities.app_helpers import Logger
 from lightning.app.utilities.cloud import is_running_in_cloud
 from lightning.app.utilities.packaging.build_config import BuildConfig
 from lightning.app.utilities.packaging.cloud_compute import CloudCompute
 from tritonclient.utils import np_to_triton_dtype
+
+from lightning_triton.base import ServeBase
 
 logger = Logger(__name__)
 
@@ -283,7 +285,6 @@ class TritonServer(ServeBase, abc.ABC):
         else:
             # locally, installing triton is painful and hence we'll call into docker
             base_image = LIGHTNING_TRITON_BASE_IMAGE
-            # TODO - install only if requirements.txt
             cmd = f'bash -c "pip install -r requirements.txt || true; {triton_cmd}"'
             docker_cmd = shlex.split(
                 f"docker run -it --shm-size=256m --rm -p8000:8000 -v {Path.cwd()}:/content/ {base_image} {cmd}"

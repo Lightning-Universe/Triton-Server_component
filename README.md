@@ -9,12 +9,19 @@ for converting api datatypes (string, int, float etc) to and from Triton datatyp
 
 ## Example
 
-### Save the file locally
+### Install the component
+
+```bash
+pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
+```
+
+### Save the app file
 
 Save the following code as `app.py`
 
 ```python
 import lightning as L
+from lightning_triton import TritonServer
 import base64, io, torchvision
 from PIL import Image as PILImage
 from pydantic import BaseModel
@@ -28,7 +35,7 @@ class Number(BaseModel):
     prediction: int
 
 
-class TorchVisionServer(L.app.components.TritonServer):
+class TorchVisionServer(TritonServer):
     def __init__(self, input_type=Image, output_type=Number):
         super().__init__(input_type=input_type, output_type=output_type)
         self._model = None
