@@ -1,5 +1,6 @@
+# !pip install torchvision pillow
 import lightning as L
-import base64, io, torchvision
+import base64, io, torchvision, lightning_triton
 from PIL import Image as PILImage
 from pydantic import BaseModel
 
@@ -12,7 +13,7 @@ class Number(BaseModel):
     prediction: int
 
 
-class TorchVisionServer(L.app.components.TritonServer):
+class TorchVisionServer(lightning_triton.TritonServer):
     def __init__(self, input_type=Image, output_type=Number):
         super().__init__(input_type=input_type, output_type=output_type)
         self._model = None

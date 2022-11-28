@@ -11,6 +11,8 @@ for converting api datatypes (string, int, float etc) to and from Triton datatyp
 
 ### Install the component
 
+Install the component using pip
+
 ```bash
 pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 ```
@@ -20,6 +22,7 @@ pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serv
 Save the following code as `app.py`
 
 ```python
+# !pip install torchvision pillow
 import lightning as L
 from lightning_triton import TritonServer
 import base64, io, torchvision

@@ -5,8 +5,8 @@ from typing import Any, Dict, Optional
 
 import torch
 from fastapi import FastAPI
-from lightning_app.core.work import LightningWork
-from lightning_app.utilities.app_helpers import Logger
+from lightning.app import LightningWork
+from lightning.app.utilities.app_helpers import Logger
 from pydantic import BaseModel
 from starlette.staticfiles import StaticFiles
 

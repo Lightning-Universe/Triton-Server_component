@@ -129,4 +129,5 @@ dmypy.json
 .pyre/
 
 .idea/
+__model_repository
 
