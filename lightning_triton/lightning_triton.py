@@ -12,13 +12,13 @@ import numpy as np
 import tritonclient.http as httpclient
 import uvicorn
 from fastapi import FastAPI
-from lightning.app.utilities import safe_pickle
 from lightning.app.utilities.app_helpers import Logger
 from lightning.app.utilities.cloud import is_running_in_cloud
 from lightning.app.utilities.packaging.build_config import BuildConfig
 from lightning.app.utilities.packaging.cloud_compute import CloudCompute
 from tritonclient.utils import np_to_triton_dtype
 
+from lightning_triton import safe_pickle
 from lightning_triton.base import ServeBase
 
 logger = Logger(__name__)
