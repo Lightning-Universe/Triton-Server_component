@@ -82,6 +82,7 @@ lightning run app app.py --setup --cloud
 ## known Limitations
 
 - [ ] When running locally, ctrl-c not terminating all the processes
+- [ ] Running locally requires docker to be installed
 - [ ] Only python backend is supported for the triton server
 - [ ] Not all the features of triton are configurable through the component
 - [ ] Only four datatypes are supported at the API level (string, int, float, bool)
