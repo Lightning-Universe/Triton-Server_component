@@ -25,7 +25,7 @@ logger = Logger(__name__)
 
 MODEL_NAME = "lightning-triton"
 LIGHTNING_TRITON_BASE_IMAGE = os.getenv(
-    "LIGHTNING_TRITON_BASE_IMAGE", "ghcr.io/gridai/lightning-triton:v0.14"
+    "LIGHTNING_TRITON_BASE_IMAGE", "ghcr.io/gridai/lightning-triton:v0.15"
 )
 
 
