@@ -32,24 +32,14 @@ Save the following code as `app.py`
 import lightning as L
 import base64, io, torchvision, lightning_triton
 from PIL import Image as PILImage
-from pydantic import BaseModel
-
-
-class Image(BaseModel):
-    image: str
-
-
-class Number(BaseModel):
-    prediction: int
 
 
 class TorchVisionServer(lightning_triton.TritonServer):
-    def __init__(self, input_type=Image, output_type=Number):
+    def __init__(self, input_type=L.app.components.Image, output_type=L.app.components.Number):
         super().__init__(input_type=input_type,
                          output_type=output_type,
                          cloud_compute=L.CloudCompute("gpu", shm_size=512),
-                         max_batch_size=8,
-                         backend="python")
+                         max_batch_size=8)
         self._model = None
 
     def setup(self):
