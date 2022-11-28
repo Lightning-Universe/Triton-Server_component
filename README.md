@@ -28,9 +28,9 @@ Save the following code as `app.py`
 
 ```python
 # !pip install torchvision pillow
+# !pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 import lightning as L
-from lightning_triton import TritonServer
-import base64, io, torchvision
+import base64, io, torchvision, lightning_triton
 from PIL import Image as PILImage
 from pydantic import BaseModel
 
@@ -43,9 +43,13 @@ class Number(BaseModel):
     prediction: int
 
 
-class TorchVisionServer(TritonServer):
+class TorchVisionServer(lightning_triton.TritonServer):
     def __init__(self, input_type=Image, output_type=Number):
-        super().__init__(input_type=input_type, output_type=output_type)
+        super().__init__(input_type=input_type,
+                         output_type=output_type,
+                         cloud_compute=L.CloudCompute("gpu", shm_size=512),
+                         max_batch_size=8,
+                         backend="python")
         self._model = None
 
     def setup(self):
@@ -74,7 +78,7 @@ app = L.LightningApp(TorchVisionServer())
 Run the app locally using the following command
 
 ```bash
-lightning run app app.py
+lightning run app app.py --setup
 ```
 
 ### Run the app in cloud
@@ -82,7 +86,7 @@ lightning run app app.py
 Run the app in cloud using the following command
 
 ```bash
-lightning run app app.py --cloud
+lightning run app app.py --setup --cloud
 ```
 
 ## known Limitations

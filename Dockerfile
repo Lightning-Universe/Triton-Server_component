@@ -26,9 +26,7 @@ RUN touch $HOME/.sudo_as_admin_successful
 RUN sudo apt-get install openssh-server
 RUN pip install lightning redis virtualenv torchvision tritonclient[http]
 RUN sudo ln -s /usr/bin/python3 /usr/bin/python
-
-# TODO Remove this and let it install from pypi
-RUN cd $HOME && git clone https://github.com/Lightning-AI/lightning/ && cd lightning && git checkout safe_pickle && pip install -e .
+RUN pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 
 # Set /content as cwd
 WORKDIR ${WORKDIR}

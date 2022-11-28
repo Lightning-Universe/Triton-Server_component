@@ -1,4 +1,5 @@
 # !pip install torchvision pillow
+# !pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 import lightning as L
 import base64, io, torchvision, lightning_triton
 from PIL import Image as PILImage
@@ -15,7 +16,11 @@ class Number(BaseModel):
 
 class TorchVisionServer(lightning_triton.TritonServer):
     def __init__(self, input_type=Image, output_type=Number):
-        super().__init__(input_type=input_type, output_type=output_type)
+        super().__init__(input_type=input_type,
+                         output_type=output_type,
+                         cloud_compute=L.CloudCompute("gpu", shm_size=512),
+                         max_batch_size=8,
+                         backend="python")
         self._model = None
 
     def setup(self):
