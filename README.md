@@ -17,6 +17,11 @@ Install the component using pip
 pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 ```
 
+### Install docker (for running the component locally)
+
+Since installing triton can be tricky in different operating systems, we use docker internally to run
+the triton server. This component expects the docker is already installed in your system.
+
 ### Save the app file
 
 Save the following code as `app.py`
@@ -79,3 +84,11 @@ Run the app in cloud using the following command
 ```bash
 lightning run app app.py --cloud
 ```
+
+## known Limitations
+
+- [ ] When running locally, ctrl-c not terminating all the processes
+- [ ] Only python backend is supported for the triton server
+- [ ] Not all the features of triton are configurable through the component
+- [ ] Only four datatypes are supported at the API level (string, int, float, bool)
+- [ ] Providing the model_repository directly to the component is not supported yet
