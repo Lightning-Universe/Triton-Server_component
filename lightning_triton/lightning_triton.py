@@ -149,11 +149,11 @@ class TritonServer(ServeBase, abc.ABC):
             raise ValueError(
                 "Triton expects the shared memory size (shm_size) to be at least 256MB"
             )
+        kwargs["cloud_build_config"] = cloud_build_config
+        kwargs["cloud_compute"] = compute_config
         super().__init__(
             *args,
             **kwargs,
-            cloud_build_config=cloud_build_config,
-            cloud_compute=compute_config,
         )
         if max_batch_size < 1:
             raise ValueError("max_batch_size must be greater than 0")
