@@ -17,7 +17,7 @@ class TorchVisionServer(lightning_triton.TritonServer):
         self._model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
         self._model.to(self.device)
 
-    def infer(self, request):
+    def predict(self, request):
         image = base64.b64decode(request.image.encode("utf-8"))
         image = PILImage.open(io.BytesIO(image))
         transforms = torchvision.transforms.Compose([

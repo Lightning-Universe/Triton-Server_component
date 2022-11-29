@@ -5,3 +5,4 @@ if not entrypoint_file.endswith(".py"):
     raise ValueError("The entrypoint doesn't seem to be a python file.")
 run_app_commands(entrypoint_file)
 
+
