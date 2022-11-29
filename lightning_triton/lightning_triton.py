@@ -279,13 +279,16 @@ class TritonServer(ServeBase, abc.ABC):
         self._attach_frontend(fastapi_app)
 
         # start triton server in subprocess
-        triton_cmd = "tritonserver --model-repository __model_repository"
+        TRITON_SERVE_COMMAND = "tritonserver --model-repository __model_repository"
         if is_running_in_cloud():
-            self._triton_server_process = subprocess.Popen(shlex.split(triton_cmd))
+            self._triton_server_process = subprocess.Popen(shlex.split(TRITON_SERVE_COMMAND))
         else:
             # locally, installing triton is painful and hence we'll call into docker
             base_image = LIGHTNING_TRITON_BASE_IMAGE
-            cmd = f'bash -c "pip install -r requirements.txt || true; {triton_cmd}"'
+            entrypoint_file = "app.py"
+            INSTALL_REQUIREMENTS = "pip install -r requirements.txt || true"
+            RUN_SETUP = f"python /usr/local/bin/docker_script.py {entrypoint_file}"
+            cmd = f'bash -c "{INSTALL_REQUIREMENTS}; {RUN_SETUP}; {TRITON_SERVE_COMMAND}"'
             docker_cmd = shlex.split(
                 f"docker run -it --shm-size=256m --rm -p8000:8000 -v {Path.cwd()}:/content/ {base_image} {cmd}"
             )

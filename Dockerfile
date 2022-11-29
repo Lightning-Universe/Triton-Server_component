@@ -27,6 +27,7 @@ RUN sudo apt-get install openssh-server
 RUN pip install lightning redis virtualenv torchvision tritonclient[http]
 RUN sudo ln -s /usr/bin/python3 /usr/bin/python
 RUN pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
+COPY ./docker_script.py /usr/local/bin/docker_script.py
 
 # Set /content as cwd
 WORKDIR ${WORKDIR}
