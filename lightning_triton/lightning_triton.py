@@ -68,6 +68,8 @@ instance_group [
 triton_model_file_template = """
 import json
 import pickle
+import sys
+from pathlib import Path
 
 import numpy as np
 import triton_python_backend_utils as pb_utils
@@ -85,7 +87,9 @@ class TritonPythonModel:
 
     def initialize(self, args):
         self.model_config = json.loads(args['model_config'])
+        sys.path.insert(1, str(Path.cwd()))
         self.work = pickle.load(open("__model_repository/lightning-triton/1/__lightning_work.pkl", "rb"))
+        sys.path.pop(1)
         self.work.setup()
 
     def execute(self, requests):
