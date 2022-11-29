@@ -5,7 +5,7 @@ import base64, io, torchvision, lightning_triton
 from PIL import Image as PILImage
 
 
-class TorchVisionServer(lightning_triton.TritonServer):
+class TorchvisionServer(lightning_triton.TritonServer):
     def __init__(self, input_type=L.app.components.Image, output_type=L.app.components.Number):
         super().__init__(input_type=input_type,
                          output_type=output_type,
@@ -31,4 +31,5 @@ class TorchVisionServer(lightning_triton.TritonServer):
         return {"prediction": prediction.argmax().item()}
 
 
-app = L.LightningApp(TorchVisionServer())
+app = L.LightningApp(TorchvisionServer())
+

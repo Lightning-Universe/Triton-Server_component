@@ -7,25 +7,19 @@ Triton Serve Component for lightning.ai
 Triton serve component enables you to deploy your model to Triton Inference Server and setup a FastAPI interface
 for converting api datatypes (string, int, float etc) to and from Triton datatypes (DT_STRING, DT_INT32 etc).
 
-## Example
+## Example building a TorchVisionServe Component
 
-### Install the component
-
-Install the component using pip
-
-```bash
-pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
-```
 
 ### Install docker (for running the component locally)
 
-Since installing triton can be tricky in different operating systems, we use docker internally to run
-the triton server. This component expects the docker is already installed in your system. Note that you
-don't need to install docker if you are running the component only on cloud.
+Since installing triton can be tricky (and not officially supported) in different operating systems, 
+we use docker internally to run the triton server. This component expects the docker is already installed in
+your system.
+Note that you don't need to install docker if you are running the component only on cloud.
 
-### Save the app file
+### Save the component into a file
 
-Save the following code as `app.py`
+Save the following code as `torch_vision_server.py`
 
 ```python
 # !pip install torchvision pillow
@@ -35,7 +29,7 @@ import base64, io, torchvision, lightning_triton
 from PIL import Image as PILImage
 
 
-class TorchVisionServer(lightning_triton.TritonServer):
+class TorchvisionServer(lightning_triton.TritonServer):
     def __init__(self, input_type=L.app.components.Image, output_type=L.app.components.Number):
         super().__init__(input_type=input_type,
                          output_type=output_type,
@@ -61,24 +55,25 @@ class TorchVisionServer(lightning_triton.TritonServer):
         return {"prediction": prediction.argmax().item()}
 
 
-app = L.LightningApp(TorchVisionServer())
+app = L.LightningApp(TorchvisionServer())
 ```
 
-### Run the app
+### Run it locally
 
-Run the app locally using the following command
+Run it locally using
 
 ```bash
 lightning run app app.py --setup
 ```
 
-### Run the app in cloud
+### Run it in the cloud
 
-Run the app in cloud using the following command
+Run it in the cloud using
 
 ```bash
 lightning run app app.py --setup --cloud
 ```
+
 
 ## known Limitations
 
