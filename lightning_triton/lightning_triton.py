@@ -17,6 +17,7 @@ import uvicorn
 from fastapi import FastAPI
 from lightning.app.utilities.app_helpers import Logger
 from lightning.app.utilities.cloud import is_running_in_cloud
+from lightning.app.utilities.network import find_free_network_port
 from lightning.app.utilities.packaging.build_config import BuildConfig
 from lightning.app.utilities.packaging.cloud_compute import CloudCompute
 from tritonclient.utils import np_to_triton_dtype
@@ -182,12 +183,12 @@ class TritonServer(ServeBase, abc.ABC):
         """
         pass
 
-    def _attach_triton_proxy_fn(self, fastapi_app: FastAPI):
+    def _attach_triton_proxy_fn(self, fastapi_app: FastAPI, triton_port: int):
         input_type: Any = self.configure_input_type()
         output_type: Any = self.configure_output_type()
 
         client = httpclient.InferenceServerClient(
-            url="127.0.0.1:8000", connection_timeout=1200.0, network_timeout=1200.0
+            url=f"127.0.0.1:{triton_port}", connection_timeout=1200.0, network_timeout=1200.0
         )
 
         def proxy_fn(request: input_type):  # type: ignore
@@ -280,13 +281,15 @@ class TritonServer(ServeBase, abc.ABC):
         """
         self._setup_model_repository()
 
+        triton_port = find_free_network_port()
+
         # setting and exposing the fast api service that sits in front of triton server
         fastapi_app = FastAPI()
-        self._attach_triton_proxy_fn(fastapi_app)
+        self._attach_triton_proxy_fn(fastapi_app, triton_port)
         self._attach_frontend(fastapi_app)
 
         # start triton server in subprocess
-        TRITON_SERVE_COMMAND = "tritonserver --model-repository __model_repository"
+        TRITON_SERVE_COMMAND = f"tritonserver --model-repository __model_repository --http-port {triton_port}"
         if is_running_in_cloud():
             self._triton_server_process = subprocess.Popen(shlex.split(TRITON_SERVE_COMMAND))
         else:
@@ -304,7 +307,7 @@ class TritonServer(ServeBase, abc.ABC):
                                  "on github with a reproducible script")
             cmd = f'bash -c "bash /usr/local/bin/docker_script.sh {entrypoint_file}; {TRITON_SERVE_COMMAND}"'
             docker_cmd = shlex.split(
-                f"docker run -it --shm-size=256m --rm -p8000:8000 -v {Path.cwd()}:/content/ {base_image} {cmd}"
+                f"docker run -it --shm-size=256m --rm -p {triton_port}:{triton_port} -v {Path.cwd()}:/content/ {base_image} {cmd}"
             )
             self._triton_server_process = subprocess.Popen(docker_cmd)
 
