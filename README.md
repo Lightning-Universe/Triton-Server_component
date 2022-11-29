@@ -20,7 +20,8 @@ pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serv
 ### Install docker (for running the component locally)
 
 Since installing triton can be tricky in different operating systems, we use docker internally to run
-the triton server. This component expects the docker is already installed in your system.
+the triton server. This component expects the docker is already installed in your system. Note that you
+don't need to install docker if you are running the component only on cloud.
 
 ### Save the app file
 
