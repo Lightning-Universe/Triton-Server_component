@@ -29,7 +29,7 @@ logger = Logger(__name__)
 
 MODEL_NAME = "lightning-triton"
 LIGHTNING_TRITON_BASE_IMAGE = os.getenv(
-    "LIGHTNING_TRITON_BASE_IMAGE", "ghcr.io/gridai/lightning-triton:v0.20"
+    "LIGHTNING_TRITON_BASE_IMAGE", "ghcr.io/gridai/lightning-triton:v0.21"
 )
 
 
@@ -307,7 +307,7 @@ class TritonServer(ServeBase, abc.ABC):
                                  "on github with a reproducible script")
             cmd = f'bash -c "bash /usr/local/bin/docker_script.sh {entrypoint_file}; {TRITON_SERVE_COMMAND}"'
             docker_cmd = shlex.split(
-                f"docker run -it --shm-size=256m --rm -p {triton_port}:{triton_port} -v {Path.cwd()}:/content/ {base_image} {cmd}"
+                f"docker run -it --shm-size=256m --rm -p {triton_port}:{triton_port} -v {Path.cwd()}:/__model_artifacts/ {base_image} {cmd}"
             )
             self._triton_server_process = subprocess.Popen(docker_cmd)
 
