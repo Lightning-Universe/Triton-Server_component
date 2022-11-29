@@ -167,7 +167,7 @@ class ServeBase(LightningWork, abc.ABC):
             apis=[
                 {
                     "name": class_name,
-                    "url": f"{url}/infer",
+                    "url": f"{url}/predict",
                     "method": "POST",
                     "request": request,
                     "response": response,
