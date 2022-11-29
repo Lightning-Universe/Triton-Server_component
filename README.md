@@ -63,7 +63,7 @@ app = L.LightningApp(TorchvisionServer())
 Run it locally using
 
 ```bash
-lightning run app app.py --setup
+lightning run app torch_vision_server.py --setup
 ```
 
 ### Run it in the cloud
@@ -71,7 +71,7 @@ lightning run app app.py --setup
 Run it in the cloud using
 
 ```bash
-lightning run app app.py --setup --cloud
+lightning run app torch_vision_server.py --setup --cloud
 ```
 
 

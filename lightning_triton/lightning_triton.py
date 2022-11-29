@@ -28,7 +28,7 @@ logger = Logger(__name__)
 
 MODEL_NAME = "lightning-triton"
 LIGHTNING_TRITON_BASE_IMAGE = os.getenv(
-    "LIGHTNING_TRITON_BASE_IMAGE", "ghcr.io/gridai/lightning-triton:v0.18"
+    "LIGHTNING_TRITON_BASE_IMAGE", "ghcr.io/gridai/lightning-triton:v0.20"
 )
 
 
@@ -292,7 +292,6 @@ class TritonServer(ServeBase, abc.ABC):
         else:
             # locally, installing triton is painful and hence we'll call into docker
             base_image = LIGHTNING_TRITON_BASE_IMAGE
-            INSTALL_REQUIREMENTS = "pip install -r requirements.txt || true"
 
             # we try to get the entrypoint file name from sys.argv. Ideally, the AppRef should have
             # the information about entrypoint file too. TODO @sherin
@@ -303,8 +302,7 @@ class TritonServer(ServeBase, abc.ABC):
             else:
                 raise ValueError("Could not find the entrypoint file. Please create an issue "
                                  "on github with a reproducible script")
-            RUN_SETUP = f"python /usr/local/bin/docker_script.py {entrypoint_file}"
-            cmd = f'bash -c "{INSTALL_REQUIREMENTS}; {RUN_SETUP}; {TRITON_SERVE_COMMAND}"'
+            cmd = f'bash -c "bash /usr/local/bin/docker_script.sh {entrypoint_file}; {TRITON_SERVE_COMMAND}"'
             docker_cmd = shlex.split(
                 f"docker run -it --shm-size=256m --rm -p8000:8000 -v {Path.cwd()}:/content/ {base_image} {cmd}"
             )

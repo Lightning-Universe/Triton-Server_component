@@ -22,12 +22,14 @@ ENV WORKDIR=/content
 # Avoid first use of sudo warning - https://askubuntu.com/a/22614/781671
 RUN touch $HOME/.sudo_as_admin_successful
 
-# installing ssh service - and setting symlink for python
-RUN sudo apt-get install openssh-server
-RUN pip install lightning redis virtualenv torchvision tritonclient[http]
-RUN sudo ln -s /usr/bin/python3 /usr/bin/python
+
+RUN pip install --upgrade pip && \
+    sudo apt-get install openssh-server && \
+    pip install lightning redis virtualenv torchvision tritonclient[http] && \
+    sudo ln -s /usr/bin/python3 /usr/bin/python && \
+    pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
+COPY ./docker_script.sh /usr/local/bin/docker_script.sh
 COPY ./docker_script.py /usr/local/bin/docker_script.py
-RUN pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 
 # Set /content as cwd
 WORKDIR ${WORKDIR}
