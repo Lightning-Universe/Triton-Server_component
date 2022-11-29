@@ -1,4 +1,5 @@
 import lightning as L
+import sys
 import abc
 import os
 import shlex
@@ -285,8 +286,17 @@ class TritonServer(ServeBase, abc.ABC):
         else:
             # locally, installing triton is painful and hence we'll call into docker
             base_image = LIGHTNING_TRITON_BASE_IMAGE
-            entrypoint_file = "app.py"
             INSTALL_REQUIREMENTS = "pip install -r requirements.txt || true"
+
+            # we try to get the entrypoint file name from sys.argv. Ideally, the AppRef should have
+            # the information about entrypoint file too. TODO @sherin
+            for i, arg in enumerate(sys.argv):
+                if arg == "run" and sys.argv[i + 1] == "app":
+                    entrypoint_file = sys.argv[i + 2]
+                    break
+            else:
+                raise ValueError("Could not find the entrypoint file. Please create an issue "
+                                 "on github with a reproducible script")
             RUN_SETUP = f"python /usr/local/bin/docker_script.py {entrypoint_file}"
             cmd = f'bash -c "{INSTALL_REQUIREMENTS}; {RUN_SETUP}; {TRITON_SERVE_COMMAND}"'
             docker_cmd = shlex.split(
