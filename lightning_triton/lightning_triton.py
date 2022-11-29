@@ -1,3 +1,5 @@
+import threading
+
 import lightning as L
 import sys
 import abc
@@ -311,7 +313,11 @@ class TritonServer(ServeBase, abc.ABC):
         logger.info(
             f"Your app has started. View it in your browser: http://{self.host}:{self.port}"
         )
-        uvicorn.run(app=fastapi_app, host=self.host, port=self.port)
+        config = uvicorn.Config(fastapi_app, host=self.host, port=self.port)
+        server = uvicorn.Server(config=config)
+        thread = threading.Thread(target=server.run)
+        thread.start()
+        thread.join()
 
     def on_exit(self):
         # TODO @sherin add the termination of uvicorn once the issue with signal/uvloop conflict is resolved
