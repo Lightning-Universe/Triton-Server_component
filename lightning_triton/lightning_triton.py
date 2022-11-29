@@ -313,7 +313,7 @@ class TritonServer(ServeBase, abc.ABC):
         logger.info(
             f"Your app has started. View it in your browser: http://{self.host}:{self.port}"
         )
-        config = uvicorn.Config(fastapi_app, host=self.host, port=self.port)
+        config = uvicorn.Config(fastapi_app, host=self.host, port=self.port, log_level="error")
         server = uvicorn.Server(config=config)
         thread = threading.Thread(target=server.run)
         thread.start()
