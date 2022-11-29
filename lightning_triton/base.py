@@ -95,7 +95,7 @@ class ServeBase(LightningWork, abc.ABC):
         return
 
     @abc.abstractmethod
-    def infer(self, request: Any) -> Any:
+    def predict(self, request: Any) -> Any:
         """This method is called when a request is made to the server.
 
         This method must be overriden by the user with the prediction logic

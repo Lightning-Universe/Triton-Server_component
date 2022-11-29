@@ -103,7 +103,7 @@ class TritonPythonModel:
                 else:
                     ip = i.as_numpy()[0][0]
                 setattr(req, inp['name'], ip)
-            resp = self.work.infer(req)
+            resp = self.work.predict(req)
             for out in self.model_config['output']:
                 if out['name'] not in resp:
                     responses.append(pb_utils.InferenceResponse(
@@ -173,7 +173,7 @@ class TritonServer(ServeBase, abc.ABC):
         self._triton_server_process = None
 
     @abc.abstractmethod
-    def infer(self, request: Any) -> Any:
+    def predict(self, request: Any) -> Any:
         """This method is called when a request is made to the server.
 
         This method must be overriden by the user with the prediction logic
@@ -216,7 +216,7 @@ class TritonServer(ServeBase, abc.ABC):
                 response[property_name] = query_response.as_numpy(property_name).item()
             return response
 
-        fastapi_app.post("/infer", response_model=output_type)(proxy_fn)
+        fastapi_app.post("/predict", response_model=output_type)(proxy_fn)
 
     def _get_config_file(self) -> str:
         """Create config.pbtxt file specific for triton-python backend"""
