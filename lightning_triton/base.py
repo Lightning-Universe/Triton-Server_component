@@ -1,4 +1,6 @@
 import abc
+import base64
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 import torch
@@ -23,14 +25,21 @@ class Image(BaseModel):
     image: Optional[str]
 
     @staticmethod
-    def request_code_sample() -> str:
+    def get_sample_data() -> Dict[Any, Any]:
+        imagepath = Path(__file__).parent / "catimage.png"
+        with open(imagepath, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).strip()
+        return {"image": encoded_string.decode("UTF-8")}
+
+    @staticmethod
+    def request_code_sample(url: str) -> str:
         return """import base64
 from pathlib import Path
 import requests
 
 img = requests.get("https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/catimage.png").content
 img = base64.b64encode(img).decode("UTF-8")
-response = requests.post("http://127.0.0.1:7777/predict", json={
+response = requests.post(""" + url + """, json={
     "image": img
 })"""
 
@@ -42,12 +51,36 @@ Path("response.png").write_bytes(img)
 """
 
 
-class Number(BaseModel):
-    prediction: Optional[int]
+class Category(BaseModel):
+    category: Optional[int]
 
     @staticmethod
-    def _get_sample_data() -> Dict[Any, Any]:
+    def get_sample_data() -> Dict[Any, Any]:
         return {"prediction": 463}
+
+    @staticmethod
+    def response_code_sample() -> str:
+        return """print("Predicted category is: ", response["category"]) 
+"""
+
+
+class Text(BaseModel):
+    text: Optional[str]
+
+    @staticmethod
+    def get_sample_data() -> Dict[Any, Any]:
+        return {"text": "A portrait of a person looking away from the camera"}
+
+    @staticmethod
+    def request_code_sample(url: str) -> str:
+        return """import base64
+from pathlib import Path
+import requests
+
+response = requests.post(""" + url + """, json={
+    "text": "A portrait of a person looking away from the camera"
+})
+"""
 
 
 class ServeBase(LightningWork, abc.ABC):
@@ -112,7 +145,7 @@ class ServeBase(LightningWork, abc.ABC):
         """
         pass
 
-    def get_code_sample(self) -> Optional[str]:
+    def get_code_sample(self, url: str) -> Optional[str]:
         input_type: Any = self.configure_input_type()
         output_type: Any = self.configure_output_type()
 
@@ -121,12 +154,12 @@ class ServeBase(LightningWork, abc.ABC):
                 hasattr(output_type, "response_code_sample")
         ):
             return None
-        return f"{input_type.request_code_sample()}\n{output_type.response_code_sample()}"
+        return f"{input_type.request_code_sample(url)}\n{output_type.response_code_sample()}"
 
     @staticmethod
     def _get_sample_dict_from_datatype(datatype: Any) -> dict:
-        if hasattr(datatype, "_get_sample_data"):
-            return datatype._get_sample_data()
+        if hasattr(datatype, "get_sample_data"):
+            return datatype.get_sample_data()
 
         datatype_props = datatype.schema()["properties"]
         out: Dict[str, Any] = {}
@@ -191,7 +224,7 @@ class ServeBase(LightningWork, abc.ABC):
             "response": response,
             "request": request
         }
-        code_sample = self.get_code_sample()
+        code_sample = self.get_code_sample(url)
         if code_sample:
             frontend_payload["code_sample"] = code_sample
 
