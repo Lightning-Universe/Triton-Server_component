@@ -6,11 +6,11 @@ from PIL import Image as PILImage
 
 
 class TorchvisionServer(lightning_triton.TritonServer):
-    def __init__(self, input_type=lightning_triton.Image, output_type=lightning_triton.Category, **kwargs):
-        super().__init__(input_type=input_type,
-                         output_type=output_type,
-                         max_batch_size=8,
-                         **kwargs)
+    def __init__(self,
+                 input_type=lightning_triton.Image,
+                 output_type=lightning_triton.Category,
+                 **kwargs):
+        super().__init__(input_type=input_type, output_type=output_type, max_batch_size=8, **kwargs)
         self._model = None
 
     def setup(self):
@@ -30,7 +30,7 @@ class TorchvisionServer(lightning_triton.TritonServer):
         image = transforms(image)
         image = image.to(self.device)
         prediction = self._model(image.unsqueeze(0))
-        return {"prediction": prediction.argmax().item()}
+        return {"category": prediction.argmax().item()}
 
 
 cloud_compute = L.CloudCompute("gpu", shm_size=512)
