@@ -25,16 +25,15 @@ Save the following code as `torch_vision_server.py`
 # !pip install torchvision pillow
 # !pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 import lightning as L
-import base64, io, torchvision, lightning_triton
+import base64, io, torchvision, lightning_triton as lt
 from PIL import Image as PILImage
 
 
-class TorchvisionServer(lightning_triton.TritonServer):
-    def __init__(self,
-                 input_type=lightning_triton.Image,
-                 output_type=lightning_triton.Category,
-                 **kwargs):
-        super().__init__(input_type=input_type, output_type=output_type, max_batch_size=8, **kwargs)
+class TorchvisionServer(lt.TritonServer):
+    def __init__(self, input_type=lt.Image, output_type=lt.Category,**kwargs):
+        super().__init__(input_type=input_type,
+                         output_type=output_type,
+                         max_batch_size=8, **kwargs)
         self._model = None
 
     def setup(self):
@@ -59,7 +58,6 @@ class TorchvisionServer(lightning_triton.TritonServer):
 
 cloud_compute = L.CloudCompute("gpu", shm_size=512)
 app = L.LightningApp(TorchvisionServer(cloud_compute=cloud_compute))
-
 ```
 
 ### Run it locally
