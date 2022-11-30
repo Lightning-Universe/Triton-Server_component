@@ -23,7 +23,7 @@ class Image(BaseModel):
     image: Optional[str]
 
     @staticmethod
-    def _get_sample_code() -> str:
+    def request_code_sample() -> str:
         return """import base64
 from pathlib import Path
 import requests
@@ -32,8 +32,14 @@ img = requests.get("https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Se
 img = base64.b64encode(img).decode("UTF-8")
 response = requests.post("http://127.0.0.1:7777/predict", json={
     "image": img
-})
-print(response.json())"""
+})"""
+
+    @staticmethod
+    def response_code_sample() -> str:
+        return """img = response["image"]
+img = base64.b64decode(img.encode("utf-8"))
+Path("response.png").write_bytes(img)
+"""
 
 
 class Number(BaseModel):
@@ -106,10 +112,19 @@ class ServeBase(LightningWork, abc.ABC):
         """
         pass
 
+    def get_code_sample(self) -> Optional[str]:
+        input_type: Any = self.configure_input_type()
+        output_type: Any = self.configure_output_type()
+
+        if not (
+                hasattr(input_type, "request_code_sample") and
+                hasattr(output_type, "response_code_sample")
+        ):
+            return None
+        return f"{input_type.request_code_sample()}\n{output_type.response_code_sample()}"
+
     @staticmethod
     def _get_sample_dict_from_datatype(datatype: Any) -> dict:
-        if hasattr(datatype, "_get_sample_code"):
-            return datatype._get_sample_code()
         if hasattr(datatype, "_get_sample_data"):
             return datatype._get_sample_data()
 
@@ -149,7 +164,6 @@ class ServeBase(LightningWork, abc.ABC):
         request, response = {}, {}
         datatype_parse_error = False
         try:
-            # TODO - properly manage the types and error conditions
             request = self._get_sample_dict_from_datatype(self.configure_input_type())
         except TypeError:
             datatype_parse_error = True
@@ -170,17 +184,18 @@ class ServeBase(LightningWork, abc.ABC):
 
             return
 
-        frontend = APIAccessFrontend(
-            apis=[
-                {
-                    "name": class_name,
-                    "url": f"{url}/predict",
-                    "method": "POST",
-                    "response": response,
-                    "request_code": request
-                }
-            ]
-        )
+        frontend_payload = {
+            "name": class_name,
+            "url": f"{url}/predict",
+            "method": "POST",
+            "response": response,
+            "request": request
+        }
+        code_sample = self.get_code_sample()
+        if code_sample:
+            frontend_payload["code_sample"] = code_sample
+
+        frontend = APIAccessFrontend(apis=[frontend_payload])
         fastapi_app.mount(
             "/", StaticFiles(directory=frontend.serve_dir, html=True), name="static"
         )
