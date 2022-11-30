@@ -1,8 +1,8 @@
 import abc
 import base64
-from pathlib import Path
 from typing import Any, Dict, Optional
 
+import requests
 import torch
 from fastapi import FastAPI
 from lightning.app import LightningWork
@@ -26,10 +26,10 @@ class Image(BaseModel):
 
     @staticmethod
     def get_sample_data() -> Dict[Any, Any]:
-        imagepath = Path(__file__).parent / "catimage.png"
-        with open(imagepath, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).strip()
-        return {"image": encoded_string.decode("UTF-8")}
+        url = "https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/catimage.png"
+        img = requests.get(url).content
+        img = base64.b64encode(img).decode("UTF-8")
+        return {"image": img}
 
     @staticmethod
     def request_code_sample(url: str) -> str:
@@ -39,13 +39,13 @@ import requests
 
 img = requests.get("https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/catimage.png").content
 img = base64.b64encode(img).decode("UTF-8")
-response = requests.post(""" + url + """, json={
+response = requests.post('""" + url + """', json={
     "image": img
 })"""
 
     @staticmethod
     def response_code_sample() -> str:
-        return """img = response["image"]
+        return """img = response.json()["image"]
 img = base64.b64decode(img.encode("utf-8"))
 Path("response.png").write_bytes(img)
 """
@@ -60,7 +60,7 @@ class Category(BaseModel):
 
     @staticmethod
     def response_code_sample() -> str:
-        return """print("Predicted category is: ", response["category"]) 
+        return """print("Predicted category is: ", response.json()["category"]) 
 """
 
 
@@ -77,7 +77,7 @@ class Text(BaseModel):
 from pathlib import Path
 import requests
 
-response = requests.post(""" + url + """, json={
+response = requests.post('""" + url + """', json={
     "text": "A portrait of a person looking away from the camera"
 })
 """
@@ -194,6 +194,7 @@ class ServeBase(LightningWork, abc.ABC):
         if not url:
             # if the url is still empty, point it to localhost
             url = f"http://127.0.0.1:{self.port}"
+        url = f"{url}/predict"
         request, response = {}, {}
         datatype_parse_error = False
         try:
@@ -219,7 +220,7 @@ class ServeBase(LightningWork, abc.ABC):
 
         frontend_payload = {
             "name": class_name,
-            "url": f"{url}/predict",
+            "url": url,
             "method": "POST",
             "response": response,
             "request": request

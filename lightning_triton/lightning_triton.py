@@ -316,9 +316,7 @@ class TritonServer(ServeBase, abc.ABC):
         )
         config = uvicorn.Config(fastapi_app, host=self.host, port=self.port, log_level="error")
         server = uvicorn.Server(config=config)
-        thread = threading.Thread(target=server.run)
-        thread.start()
-        thread.join()
+        server.run()
 
     def on_exit(self):
         # TODO @sherin add the termination of uvicorn once the issue with signal/uvloop conflict is resolved
