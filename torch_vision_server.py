@@ -6,11 +6,11 @@ from PIL import Image as PILImage
 
 
 class TorchvisionServer(lightning_triton.TritonServer):
-    def __init__(self, input_type=L.app.components.Image, output_type=L.app.components.Number):
+    def __init__(self, input_type=L.app.components.Image, output_type=L.app.components.Number, **kwargs):
         super().__init__(input_type=input_type,
                          output_type=output_type,
-                         cloud_compute=L.CloudCompute("gpu", shm_size=512),
-                         max_batch_size=8)
+                         max_batch_size=8,
+                         **kwargs)
         self._model = None
 
     def setup(self):
@@ -31,5 +31,5 @@ class TorchvisionServer(lightning_triton.TritonServer):
         return {"prediction": prediction.argmax().item()}
 
 
-app = L.LightningApp(TorchvisionServer())
+app = L.LightningApp(TorchvisionServer(cloud_compute=L.CloudCompute("gpu", shm_size=512)))
 
