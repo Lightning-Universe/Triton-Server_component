@@ -30,15 +30,17 @@ from PIL import Image as PILImage
 
 
 class TorchvisionServer(lightning_triton.TritonServer):
-    def __init__(self, input_type=L.app.components.Image, output_type=L.app.components.Number):
+    def __init__(self, input_type=L.app.components.Image, output_type=L.app.components.Number, **kwargs):
         super().__init__(input_type=input_type,
                          output_type=output_type,
-                         cloud_compute=L.CloudCompute("gpu", shm_size=512),
-                         max_batch_size=8)
+                         max_batch_size=8,
+                         **kwargs)
         self._model = None
 
     def setup(self):
-        self._model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
+        self._model = torchvision.models.resnet18(
+            weights=torchvision.models.ResNet18_Weights.DEFAULT
+        )
         self._model.to(self.device)
 
     def predict(self, request):
@@ -55,7 +57,8 @@ class TorchvisionServer(lightning_triton.TritonServer):
         return {"prediction": prediction.argmax().item()}
 
 
-app = L.LightningApp(TorchvisionServer())
+cloud_compute = L.CloudCompute("gpu", shm_size=512)
+app = L.LightningApp(TorchvisionServer(cloud_compute=cloud_compute))
 ```
 
 ### Run it locally

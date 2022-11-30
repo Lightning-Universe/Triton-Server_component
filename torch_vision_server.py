@@ -14,7 +14,9 @@ class TorchvisionServer(lightning_triton.TritonServer):
         self._model = None
 
     def setup(self):
-        self._model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
+        self._model = torchvision.models.resnet18(
+            weights=torchvision.models.ResNet18_Weights.DEFAULT
+        )
         self._model.to(self.device)
 
     def predict(self, request):
@@ -31,5 +33,5 @@ class TorchvisionServer(lightning_triton.TritonServer):
         return {"prediction": prediction.argmax().item()}
 
 
-app = L.LightningApp(TorchvisionServer(cloud_compute=L.CloudCompute("gpu", shm_size=512)))
-
+cloud_compute = L.CloudCompute("gpu", shm_size=512)
+app = L.LightningApp(TorchvisionServer(cloud_compute=cloud_compute))
