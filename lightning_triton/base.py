@@ -1,6 +1,4 @@
 import abc
-import base64
-from pathlib import Path
 from typing import Any, Dict, Optional
 
 import torch
@@ -25,11 +23,17 @@ class Image(BaseModel):
     image: Optional[str]
 
     @staticmethod
-    def _get_sample_data() -> Dict[Any, Any]:
-        imagepath = Path(__file__).parent / "catimage.png"
-        with open(imagepath, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).strip()
-        return {"image": encoded_string.decode("UTF-8")}
+    def _get_sample_code() -> str:
+        return """import base64
+from pathlib import Path
+import requests
+
+img = requests.get("https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/catimage.png").content
+img = base64.b64encode(img).decode("UTF-8")
+response = requests.post("http://127.0.0.1:7777/predict", json={
+    "image": img
+})
+print(response.json())"""
 
 
 class Number(BaseModel):
@@ -104,6 +108,8 @@ class ServeBase(LightningWork, abc.ABC):
 
     @staticmethod
     def _get_sample_dict_from_datatype(datatype: Any) -> dict:
+        if hasattr(datatype, "_get_sample_code"):
+            return datatype._get_sample_code()
         if hasattr(datatype, "_get_sample_data"):
             return datatype._get_sample_data()
 
@@ -143,6 +149,7 @@ class ServeBase(LightningWork, abc.ABC):
         request, response = {}, {}
         datatype_parse_error = False
         try:
+            # TODO - properly manage the types and error conditions
             request = self._get_sample_dict_from_datatype(self.configure_input_type())
         except TypeError:
             datatype_parse_error = True
@@ -169,8 +176,8 @@ class ServeBase(LightningWork, abc.ABC):
                     "name": class_name,
                     "url": f"{url}/predict",
                     "method": "POST",
-                    "request": request,
                     "response": response,
+                    "request_code": request
                 }
             ]
         )
