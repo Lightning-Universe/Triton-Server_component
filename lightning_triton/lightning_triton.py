@@ -311,7 +311,8 @@ class TritonServer(ServeBase, abc.ABC):
         # check if triton server is up
         while True:
             try:
-                requests.get(f"http://127.0.0.1:{triton_port}")
+                resp = requests.get(f"http://127.0.0.1:{triton_port}")
+                print(resp)
             except requests.exceptions.ConnectionError:
                 time.sleep(0.3)
             else:
