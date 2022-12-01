@@ -288,7 +288,7 @@ class TritonServer(ServeBase, abc.ABC):
         # start triton server in subprocess
         TRITON_SERVE_COMMAND = f"tritonserver --model-repository __model_repository --http-port {triton_port}"
         if is_running_in_cloud():
-            self._triton_server_process = subprocess.Popen(shlex.split(TRITON_SERVE_COMMAND))
+            _triton_server_process = subprocess.Popen(shlex.split(TRITON_SERVE_COMMAND))
         else:
             # locally, installing triton is painful and hence we'll call into docker
             base_image = LIGHTNING_TRITON_BASE_IMAGE
@@ -306,7 +306,7 @@ class TritonServer(ServeBase, abc.ABC):
             docker_cmd = shlex.split(
                 f"docker run -it --shm-size=256m --rm -p {triton_port}:{triton_port} -v {Path.cwd()}:/__model_artifacts/ {base_image} {cmd}"
             )
-            self._triton_server_process = subprocess.Popen(docker_cmd, start_new_session=True)
+            _triton_server_process = subprocess.Popen(docker_cmd)
 
         # check if triton server is up
         while True:
@@ -325,11 +325,14 @@ class TritonServer(ServeBase, abc.ABC):
                 triton_port
             )
         )
-        self._fastapi_process = fastapi_proc
         fastapi_proc.start()
         logger.info(
             f"Your app has started. View it in your browser: http://{self.host}:{self.port}"
         )
+
+        self._triton_server_process = _triton_server_process
+        self._fastapi_process = fastapi_proc
+
         fastapi_proc.join()
 
     def on_exit(self):

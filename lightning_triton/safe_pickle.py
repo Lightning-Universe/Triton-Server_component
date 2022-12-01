@@ -42,8 +42,8 @@ def get_picklable_work(work: LightningWork) -> LightningWork:
             └── bar
                 └── app.py
     """
-    # pickling the user work class - pickling `self` will cause issue because the
-    # work is running under a process, in local
+    # pickling the user work class taken from app ref - pickling `self` instead might
+    # cause issue because components might have added non-picklable arguments to it
     app_ref = _LightningAppRef.get_current()
     if app_ref is None:
         raise RuntimeError("Cannot pickle LightningWork outside of a LightningApp")
