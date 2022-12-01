@@ -309,20 +309,29 @@ class TritonServer(ServeBase, abc.ABC):
             _triton_server_process = subprocess.Popen(docker_cmd)
 
         # check if triton server is up
-        # while True:
-        #     try:
-        #         requests.get(f"http://127.0.0.1:{triton_port}")
-        #     except requests.exceptions.ConnectionError:
-        #         time.sleep(0.3)
-        #     else:
-        #         time.sleep(0.5)
-        #         break
+        while True:
+            try:
+                requests.get(f"http://127.0.0.1:{triton_port}")
+            except requests.exceptions.ConnectionError:
+                time.sleep(0.3)
+            else:
+                time.sleep(0.5)
+                break
+
+        url = self._future_url if self._future_url else self.url
+        if not url:
+            # if the url is still empty, point it to localhost
+            url = f"http://127.0.0.1:{self.port}"
+        url = f"{url}/predict"
 
         fastapi_proc = multiprocessing.Process(
             target=_run_fast_api,
             args=(
                 safe_pickle.get_picklable_work(self),
-                triton_port
+                triton_port,
+                url,
+                self.host,
+                self.port,
             )
         )
         fastapi_proc.start()
@@ -342,11 +351,11 @@ class TritonServer(ServeBase, abc.ABC):
             self._fastapi_process.kill()
 
 
-def _run_fast_api(self, triton_port):
+def _run_fast_api(self, triton_port, url, fastapi_host, fastapi_port):
     # setting and exposing the fast api service that sits in front of triton server
     fastapi_app = FastAPI()
     self._attach_triton_proxy_fn(fastapi_app, triton_port)
-    self._attach_frontend(fastapi_app)
-    config = uvicorn.Config(fastapi_app, host=self.host, port=self.port, log_level="error")
+    self._attach_frontend(fastapi_app, url)
+    config = uvicorn.Config(fastapi_app, host=fastapi_host, port=fastapi_port, log_level="error")
     server = uvicorn.Server(config=config)
     server.run()

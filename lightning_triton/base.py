@@ -209,15 +209,9 @@ class ServeBase(LightningWork, abc.ABC):
 
         fastapi_app.post("/predict", response_model=output_type)(infer_fn)
 
-    def _attach_frontend(self, fastapi_app: FastAPI) -> None:
+    def _attach_frontend(self, fastapi_app: FastAPI, url) -> None:
         from lightning_api_access import APIAccessFrontend
-
         class_name = self.__class__.__name__
-        url = self._future_url if self._future_url else self.url
-        if not url:
-            # if the url is still empty, point it to localhost
-            url = f"http://127.0.0.1:{self.port}"
-        url = f"{url}/predict"
         request, response = {}, {}
         datatype_parse_error = False
         try:
