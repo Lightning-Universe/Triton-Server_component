@@ -27,7 +27,7 @@ def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comme
 
 setup(
     name="lightning_triton",
-    version="0.0.3",
+    version="0.0.4",
     description="⚡ Triton Inference Server in Lightning.AI ⚡",
     long_description="⚡ Deploy models into Triton Inference server using Lightning ⚡",
     author="Lightning et al.",

@@ -277,7 +277,6 @@ class TritonServer(ServeBase, abc.ABC):
             f.write(config)
 
     def run(self, *args: Any, **kwargs: Any) -> Any:
-        print("=======================", os.getpid())
         """Run method takes care of configuring and setting up a FastAPI server behind the scenes.
 
         Normally, you don't need to override this method.

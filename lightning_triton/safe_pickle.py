@@ -1,3 +1,4 @@
+import contextlib
 import pickle
 import sys
 import types
@@ -7,6 +8,20 @@ from pathlib import Path
 
 from lightning.app.core.work import LightningWork
 from lightning.app.utilities.app_helpers import _LightningAppRef
+
+
+NON_PICKLABLE_WORK_ARGS = ['_request_queue', '_response_queue', '_backend', '_setattr_replacement']
+
+
+@contextlib.contextmanager
+def trimmed_work(work: LightningWork):
+    holder = {}
+    for arg in NON_PICKLABLE_WORK_ARGS:
+        holder[arg] = getattr(work, arg)
+        setattr(work, arg, None)
+    yield
+    for arg in NON_PICKLABLE_WORK_ARGS:
+        setattr(work, arg, holder[arg])
 
 
 def get_picklable_work(work: LightningWork) -> LightningWork:
@@ -27,7 +42,6 @@ def get_picklable_work(work: LightningWork) -> LightningWork:
             └── bar
                 └── app.py
     """
-
     # pickling the user work class - pickling `self` will cause issue because the
     # work is running under a process, in local
     app_ref = _LightningAppRef.get_current()
@@ -36,10 +50,12 @@ def get_picklable_work(work: LightningWork) -> LightningWork:
     for w in app_ref.works:
         if work.name == w.name:
             # copying the work object to avoid modifying the original work object
-            copied_work = deepcopy(w)
+            with trimmed_work(w):
+                copied_work = deepcopy(w)
             break
     else:
         raise ValueError(f"Work with name {work.name} not found in the app references")
+
     # if work is defined in the __main__ or __mp__main__ (the entrypoint file for `lightning run app` command),
     # pickling/unpickling will fail, hence we need patch the module information
     if "_main__" in copied_work.__class__.__module__:
