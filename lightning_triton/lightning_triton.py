@@ -309,15 +309,14 @@ class TritonServer(ServeBase, abc.ABC):
             _triton_server_process = subprocess.Popen(docker_cmd)
 
         # check if triton server is up
-        while True:
-            try:
-                resp = requests.get(f"http://127.0.0.1:{triton_port}")
-                print(resp)
-            except requests.exceptions.ConnectionError:
-                time.sleep(0.3)
-            else:
-                time.sleep(0.5)
-                break
+        # while True:
+        #     try:
+        #         requests.get(f"http://127.0.0.1:{triton_port}")
+        #     except requests.exceptions.ConnectionError:
+        #         time.sleep(0.3)
+        #     else:
+        #         time.sleep(0.5)
+        #         break
 
         fastapi_proc = multiprocessing.Process(
             target=_run_fast_api,
