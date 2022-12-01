@@ -1,2 +1,2 @@
 tritonclient[http]
-lightning_api_access>=0.0.4
+lightning_api_access>=0.0.5
