@@ -83,27 +83,27 @@ response = requests.post('""" + url + """', json={
 """
 
 
-class Waveform(BaseModel):
+class WaveForm(BaseModel):
     waveform: Optional[str]
-
-    @staticmethod
-    def get_sample_data() -> Dict[Any, Any]:
-        url = "https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/audio_file.wav"
-        audio = requests.get(url).content
-        audio = base64.b64encode(audio).decode("UTF-8")
-        return {"waveform": audio}
-
-    @staticmethod
-    def request_code_sample(url: str) -> str:
-        return """import base64
-from pathlib import Path
-import requests
-
-img = requests.get("https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/audio_file.wav").content
-img = base64.b64encode(img).decode("UTF-8")
-response = requests.post('""" + url + """', json={
-    "image": img
-})"""
+#
+#     @staticmethod
+#     def get_sample_data() -> Dict[Any, Any]:
+#         url = "https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/audio_file.wav"
+#         audio = requests.get(url).content
+#         audio = base64.b64encode(audio).decode("UTF-8")
+#         return {"waveform": audio}
+#
+#     @staticmethod
+#     def request_code_sample(url: str) -> str:
+#         return """import base64
+# from pathlib import Path
+# import requests
+#
+# img = requests.get("https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/audio_file.wav").content
+# img = base64.b64encode(img).decode("UTF-8")
+# response = requests.post('""" + url + """', json={
+#     "image": img
+# })"""
 
 
 class ServeBase(LightningWork, abc.ABC):
