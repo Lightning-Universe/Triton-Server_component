@@ -1,6 +1,6 @@
-import threading
+import multiprocessing
+import time
 
-import lightning as L
 import sys
 import abc
 import os
@@ -12,6 +12,7 @@ from typing import Any
 
 import jinja2
 import numpy as np
+import requests
 import tritonclient.http as httpclient
 import uvicorn
 from fastapi import FastAPI
@@ -174,6 +175,7 @@ class TritonServer(ServeBase, abc.ABC):
             )
         self.backend = backend
         self._triton_server_process = None
+        self._fastapi_process = None
 
     @abc.abstractmethod
     def predict(self, request: Any) -> Any:
@@ -275,6 +277,7 @@ class TritonServer(ServeBase, abc.ABC):
             f.write(config)
 
     def run(self, *args: Any, **kwargs: Any) -> Any:
+        print("=======================", os.getpid())
         """Run method takes care of configuring and setting up a FastAPI server behind the scenes.
 
         Normally, you don't need to override this method.
@@ -282,11 +285,6 @@ class TritonServer(ServeBase, abc.ABC):
         self._setup_model_repository()
 
         triton_port = find_free_network_port()
-
-        # setting and exposing the fast api service that sits in front of triton server
-        fastapi_app = FastAPI()
-        self._attach_triton_proxy_fn(fastapi_app, triton_port)
-        self._attach_frontend(fastapi_app)
 
         # start triton server in subprocess
         TRITON_SERVE_COMMAND = f"tritonserver --model-repository __model_repository --http-port {triton_port}"
@@ -309,16 +307,44 @@ class TritonServer(ServeBase, abc.ABC):
             docker_cmd = shlex.split(
                 f"docker run -it --shm-size=256m --rm -p {triton_port}:{triton_port} -v {Path.cwd()}:/__model_artifacts/ {base_image} {cmd}"
             )
-            self._triton_server_process = subprocess.Popen(docker_cmd)
+            self._triton_server_process = subprocess.Popen(docker_cmd, start_new_session=True)
 
+        # check if triton server is up
+        while True:
+            try:
+                requests.get(f"http://127.0.0.1:{triton_port}")
+            except requests.exceptions.ConnectionError:
+                time.sleep(0.3)
+            else:
+                time.sleep(0.5)
+                break
+
+        fastapi_proc = multiprocessing.Process(
+            target=_run_fast_api,
+            args=(
+                safe_pickle.get_picklable_work(self),
+                triton_port
+            )
+        )
+        self._fastapi_process = fastapi_proc
+        fastapi_proc.start()
         logger.info(
             f"Your app has started. View it in your browser: http://{self.host}:{self.port}"
         )
-        config = uvicorn.Config(fastapi_app, host=self.host, port=self.port, log_level="error")
-        server = uvicorn.Server(config=config)
-        server.run()
+        fastapi_proc.join()
 
     def on_exit(self):
-        # TODO @sherin add the termination of uvicorn once the issue with signal/uvloop conflict is resolved
         if self._triton_server_process:
             self._triton_server_process.kill()
+        if self._fastapi_process:
+            self._fastapi_process.kill()
+
+
+def _run_fast_api(self, triton_port):
+    # setting and exposing the fast api service that sits in front of triton server
+    fastapi_app = FastAPI()
+    self._attach_triton_proxy_fn(fastapi_app, triton_port)
+    self._attach_frontend(fastapi_app)
+    config = uvicorn.Config(fastapi_app, host=self.host, port=self.port, log_level="error")
+    server = uvicorn.Server(config=config)
+    server.run()
