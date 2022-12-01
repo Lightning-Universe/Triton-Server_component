@@ -13,6 +13,7 @@ from typing import Any
 import jinja2
 import numpy as np
 import requests
+import torch
 import tritonclient.http as httpclient
 import uvicorn
 from fastapi import FastAPI
@@ -303,9 +304,12 @@ class TritonServer(ServeBase, abc.ABC):
                 raise ValueError("Could not find the entrypoint file. Please create an issue "
                                  "on github with a reproducible script")
             cmd = f'bash -c "bash /usr/local/bin/docker_script.sh {entrypoint_file}; {TRITON_SERVE_COMMAND}"'
-            docker_cmd = shlex.split(
-                f"docker run -it --shm-size=256m --rm -p {triton_port}:{triton_port} -v {Path.cwd()}:/__model_artifacts/ {base_image} {cmd}"
-            )
+            first = f"docker run -it --shm-size=256m --rm -p {triton_port}:{triton_port} -v {Path.cwd()}:/__model_artifacts/ "
+            middle = ""
+            if self.device == torch.device("cuda"):
+                middle += " --gpus all --env NVIDIA_VISIBLE_DEVICES=all "
+            last = f"{base_image} {cmd}"
+            docker_cmd = shlex.split(first + middle + last)
             _triton_server_process = subprocess.Popen(docker_cmd)
 
         # check if triton server is up
