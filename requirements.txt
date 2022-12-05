@@ -1,2 +1,3 @@
 tritonclient[http]
 lightning_api_access>=0.0.5
+nvidia-smi

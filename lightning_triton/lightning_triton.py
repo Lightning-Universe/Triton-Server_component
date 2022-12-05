@@ -33,6 +33,8 @@ MODEL_NAME = "lightning-triton"
 LIGHTNING_TRITON_BASE_IMAGE = os.getenv(
     "LIGHTNING_TRITON_BASE_IMAGE", "ghcr.io/gridai/lightning-triton:v0.22"
 )
+# https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html
+MIN_NVIDIA_DRIVER_REQUIREMENT_MAP = {"22.10": "520"}
 
 
 environment = jinja2.Environment()
@@ -277,11 +279,31 @@ class TritonServer(ServeBase, abc.ABC):
         with open(config_path / "config.pbtxt", "w") as f:
             f.write(config)
 
+    @staticmethod
+    def _check_nvidia_driver_compatibility():
+        cmd = shlex.split("nvidia-smi --query-gpu=driver_version --format=csv,noheader --id=0")
+        try:
+            version = subprocess.check_output(cmd).decode().strip()
+        except FileNotFoundError:
+            raise RuntimeError(
+                "nvidia-smi is not found. Please make sure that nvidia-smi is installed and available in the PATH"
+            )
+        triton_version = "22.10"
+        if version < MIN_NVIDIA_DRIVER_REQUIREMENT_MAP[triton_version]:
+            raise RuntimeError(
+                f"Your nvidia driver version is {version}."
+                f"Lightning Triton {triton_version} requires nvidia driver "
+                f"version >= {MIN_NVIDIA_DRIVER_REQUIREMENT_MAP[triton_version]}"
+            )
+
     def run(self, *args: Any, **kwargs: Any) -> Any:
         """Run method takes care of configuring and setting up a FastAPI server behind the scenes.
 
         Normally, you don't need to override this method.
         """
+        if self.device == torch.device("cuda"):
+            self._check_nvidia_driver_compatibility()
+
         self._setup_model_repository()
 
         triton_port = find_free_network_port()
