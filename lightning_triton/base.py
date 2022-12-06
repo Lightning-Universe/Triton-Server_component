@@ -1,5 +1,7 @@
 import abc
 import base64
+import shlex
+import subprocess
 from typing import Any, Dict, Optional
 
 import requests
@@ -11,6 +13,9 @@ from pydantic import BaseModel
 from starlette.staticfiles import StaticFiles
 
 logger = Logger(__name__)
+
+CUDA_DEVICE = "cuda:0"
+CPU_DEVICE = "cpu"
 
 
 class _DefaultInputData(BaseModel):
@@ -123,12 +128,23 @@ class ServeBase(LightningWork, abc.ABC):
         self._supported_pydantic_types = {"string", "number", "integer", "boolean"}
         self._input_type = self._verify_type(input_type)
         self._output_type = self._verify_type(output_type)
+        self._device = None
 
     @property
-    def device(self):
-        return (
-            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        )
+    def device(self) -> str:
+        if self._device:
+            return self._device
+
+        cmd = shlex.split("nvidia-smi --query-gpu=count --format=csv,noheader")
+        try:
+            output = int(subprocess.check_output(cmd).decode().strip())
+            self._device = CUDA_DEVICE if output > 0 else CPU_DEVICE
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            self._device = CPU_DEVICE
+        except ValueError:
+            logger.warn("Unable to parse nvidia-smi output, setting device to CPU")
+            self._device = CPU_DEVICE
+        return self._device
 
     def configure_input_type(self) -> type:
         """Override this method to configure the input type for the API.
