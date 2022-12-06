@@ -2,11 +2,13 @@
 # !pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 import lightning as L
 import base64, io, torchvision, lightning_triton as lt
+
+import torch
 from PIL import Image as PILImage
 
 
 class TorchvisionServer(lt.TritonServer):
-    def __init__(self, input_type=lt.Image, output_type=lt.Category,**kwargs):
+    def __init__(self, input_type=lt.Image, output_type=lt.Category, **kwargs):
         super().__init__(input_type=input_type,
                          output_type=output_type,
                          max_batch_size=8, **kwargs)
@@ -16,7 +18,7 @@ class TorchvisionServer(lt.TritonServer):
         self._model = torchvision.models.resnet18(
             weights=torchvision.models.ResNet18_Weights.DEFAULT
         )
-        self._model.to(self.device)
+        self._model.to(torch.device(self.device))
 
     def predict(self, request):
         image = base64.b64decode(request.image.encode("utf-8"))
