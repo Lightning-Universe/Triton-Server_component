@@ -6,7 +6,6 @@ import lightning_triton as lt, torch, torchaudio
 
 
 class GreedyCTCDecoder(torch.nn.Module):
-    # TODO this sholdn't be here
     def __init__(self, labels, blank=0):
         super().__init__()
         self.labels = labels

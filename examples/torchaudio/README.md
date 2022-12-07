@@ -1,14 +1,20 @@
+# Serve Audio to Text built with Torch Audio using Lightning Triton Serve
+
 ### Step 1
 
 Clone this repo and cd to examples/torchaudio
 
 ### Step 2
 
-Create a new env and install lightning
+Install lightning using
+
+```bash
+pip install -U lightning
+```
 
 ### Step 3
 
-run 
+run the component using below command (if you need to run it in clud, add `--cloud` at the end of the command) 
 
 ```bash
 lightning run app serve_torch_audio.py --setup
@@ -16,7 +22,9 @@ lightning run app serve_torch_audio.py --setup
 
 ### Step 4
 
-Once the server is up, run
+Once the server is up and running, you should see the client code in the Lightning App UI.
+Run that in a terminal to interact with the server. We have already copied that code
+into `client.py`, incase you need. Run it with
 
 ```bash
 python client.py
