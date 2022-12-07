@@ -31,17 +31,18 @@ class TorchAudioServe(lt.TritonServer):
                          output_type=output_type,
                          cloud_compute=L.CloudCompute("gpu-rtx", shm_size=512),
                          max_batch_size=8)
+        self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self._model = None
 
     def setup(self):
         bundle = torchaudio.pipelines.WAV2VEC2_ASR_BASE_960H
-        self._model = bundle.get_model().to(self.device)
+        self._model = bundle.get_model().to(self._device)
         self._model._decoder = GreedyCTCDecoder(labels=bundle.get_labels())
         self._model.sample_rate = bundle.sample_rate
 
     def predict(self, request):
         aux = request.waveform.split(" ")
-        waveform = torch.FloatTensor([float(i) for i in aux[:-1:]]).to(self.device)
+        waveform = torch.FloatTensor([float(i) for i in aux[:-1:]]).to(self._device)
         print("Fixing sample rate")
         if int(aux[-1]) != self._model.sample_rate:
             waveform = torchaudio.functional.resample(waveform, int(aux[-1]), self._model.sample_rate)
