@@ -87,7 +87,7 @@ Run it in the cloud using
 lightning run app torch_vision_server.py --setup --cloud
 ```
 
-## More Examples
+## More examples
 
 We have added more examples that uses different datatypes in the example directory. 
 Follow the instructions for each of those here
