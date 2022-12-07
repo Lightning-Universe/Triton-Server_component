@@ -20,7 +20,7 @@ cd LAI-Triton-Server-Component/examples/stable-diffusion
 
 ### Step 3
 
-run the component using below command (if you need to run it in clud, add `--cloud` at the end of the command)
+run the component using below command (if you need to run it in cloud, add `--cloud` at the end of the command)
 
 ```bash
 lightning run app serve_stable_diffusion.py --setup
