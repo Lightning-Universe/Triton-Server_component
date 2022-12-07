@@ -131,4 +131,9 @@ dmypy.json
 .idea/
 __model_repository
 .lightning
+*.ckpt
+*.yaml
+*.yml
+
+setup_machine.sh
 

@@ -58,12 +58,23 @@ cloud_compute = L.CloudCompute("gpu", shm_size=512)
 app = L.LightningApp(TorchvisionServer(cloud_compute=cloud_compute))
 ```
 
+### Install lightning
+
+If you don't have lightning installed yet, install it using
+
+```bash
+pip install -U lightning
+```
+
 ### Run it locally
 
 Since installing Triton can be tricky (and not officially supported) in different operating systems, 
-we use docker internally to run the Triton server. Keep in mind that the docker image is very huge (about 20 GB) and can
-affect the startup time on the first time you run it. This component expects the docker is already installed in 
-your system. Note that you don't need to install docker if you are running the component only on cloud.
+we use docker internally to run the Triton server. This component expects the docker is already installed in
+your system. If you don't have docker installed, you can install it from [here](https://docs.docker.com/get-docker/)
+
+Note that you don't need to install docker if you are running the component only on cloud. 
+Keep in mind that the docker image is very huge (about 20 GB) and can affect the startup time on the
+first time you run it. 
 
 Run it locally using
 
@@ -78,6 +89,15 @@ Run it in the cloud using
 ```bash
 lightning run app torch_vision_server.py --setup --cloud
 ```
+
+## More examples
+
+Check out more examples that serve different model types in the example directory. 
+Follow the instructions for each of those here
+
+- [Stable Diffusion](examples/stable-diffusion/README.md)
+- [Image Classification using Torch vision](examples/torchvision/README.md)
+- [Audio Transcription using Torch Audio](examples/torchaudio/README.md)
 
 
 ## Known Limitations

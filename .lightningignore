@@ -1,2 +1,5 @@
 .git/
 __model_repository/
+*.ckpt
+*.yaml
+*.yml

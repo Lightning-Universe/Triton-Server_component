@@ -1,4 +1,4 @@
-# Serve an Audio transcription built with Torch Audio using Lightning Triton Serve
+# Serve Stable Diffusion using Lightning Triton Serve
 
 ### Step 1
 
@@ -10,26 +10,30 @@ pip install -U lightning
 
 ### Step 2
 
-Clone this repo and cd to examples/torchaudio
+Clone this repo and cd to examples/stable-diffusion
 
 ```bash
 git clone https://github.com/Lightning-AI/LAI-Triton-Server-Component.git
-cd LAI-Triton-Server-Component/examples/torchaudio
+cd LAI-Triton-Server-Component/examples/stable-diffusion
 ```
+
 
 ### Step 3
 
-For running the component locally, use below command 
+For running the component locally, use below command
 
 ```bash
-lightning run app serve_torch_audio.py --setup
+lightning run app serve_stable_diffusion.py --setup
 ```
+Note: This is going to download the stable diffusion weights from s3 and can take time depends on your internet speed.
+
 
 For running it in cloud, use below command
 
 ```bash
-lightning run app serve_torch_audio.py --setup --cloud
+lightning run app serve_stable_diffusion.py --setup --cloud
 ```
+
 
 ### Step 4
 
