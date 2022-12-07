@@ -3,19 +3,15 @@
 ## Introduction
 
 Triton serve component enables you to deploy your model to Triton Inference Server and setup a FastAPI interface
-for converting api datatypes (string, int, float etc) to and from Triton datatypes (DT_STRING, DT_INT32 etc).
+for converting api datatypes (`string`, `integer`, `float` etc) to and from Triton datatypes (`DT_STRING`, `DT_INT32` etc).
 
-## Example building a TorchVisionServe Component
+## What is Triton
 
+< TODO >
 
-### Install docker (for running the component locally)
+## Let's do an example
 
-Since installing triton can be tricky (and not officially supported) in different operating systems, 
-we use docker internally to run the triton server. This component expects the docker is already installed in
-your system.
-Note that you don't need to install docker if you are running the component only on cloud.
-
-### Save the component into a file
+We'll use the Triton Serve component in this example to serve a torch vision model
 
 Save the following code as `torch_vision_server.py`
 
@@ -24,7 +20,7 @@ Save the following code as `torch_vision_server.py`
 # !pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 import lightning as L
 import base64, io, torchvision, lightning_triton as lt
-from PIL import Image as PILImage
+from PIL import Image
 
 
 class TorchvisionServer(lt.TritonServer):
@@ -32,24 +28,25 @@ class TorchvisionServer(lt.TritonServer):
         super().__init__(input_type=input_type,
                          output_type=output_type,
                          max_batch_size=8, **kwargs)
+        self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self._model = None
 
     def setup(self):
         self._model = torchvision.models.resnet18(
             weights=torchvision.models.ResNet18_Weights.DEFAULT
         )
-        self._model.to(self.device)
+        self._model.to(self._device)
 
     def predict(self, request):
         image = base64.b64decode(request.image.encode("utf-8"))
-        image = PILImage.open(io.BytesIO(image))
+        image = Image.open(io.BytesIO(image))
         transforms = torchvision.transforms.Compose([
             torchvision.transforms.Resize(224),
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
         image = transforms(image)
-        image = image.to(self.device)
+        image = image.to(self._device)
         prediction = self._model(image.unsqueeze(0))
         return {"category": prediction.argmax().item()}
 
@@ -59,6 +56,11 @@ app = L.LightningApp(TorchvisionServer(cloud_compute=cloud_compute))
 ```
 
 ### Run it locally
+
+Since installing triton can be tricky (and not officially supported) in different operating systems, 
+we use docker internally to run the triton server. This component expects the docker is already installed in
+your system.
+Note that you don't need to install docker if you are running the component only on cloud.
 
 Run it locally using
 
