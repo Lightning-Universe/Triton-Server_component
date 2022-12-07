@@ -86,7 +86,7 @@ Follow the instructions for each of those here
 
 - [Stable Diffusion](examples/stable-diffusion/README.md)
 - [Image Classification using Torch vision](examples/style-transfer/README.md)
-- [Audio to Text using Torch Audio](examples/text-classification/README.md)
+- [Audio Transcription using Torch Audio](examples/text-classification/README.md)
 
 
 ## Known Limitations
