@@ -1,8 +1,8 @@
-# Triton Serve on Lightning AI
+# Triton Server on Lightning AI
 
 ## Introduction
 
-Triton serve component enables you to deploy your model to Triton Inference Server and setup a FastAPI interface
+Triton server component enables you to deploy your model to Triton Inference Server and setup a FastAPI interface
 for converting api datatypes (`string`, `integer`, `float` etc) to and from Triton datatypes (`DT_STRING`, `DT_INT32` etc).
 
 ## What is Triton
@@ -14,13 +14,13 @@ efficiently by batching requests and optimizing the model execution. For more de
 
 ## Let's do an example
 
-We'll use the Triton Serve component in this example to serve a torch vision model
+We'll use the Triton Server component in this example to serve a torch vision model
 
 Save the following code as `torch_vision_server.py`
 
 ```python
 # !pip install torch torchvision pillow
-# !pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
+# !pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Server-Component.git
 import lightning as L
 import base64, io, torch, torchvision, lightning_triton as lt
 from PIL import Image
