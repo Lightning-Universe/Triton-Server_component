@@ -134,3 +134,6 @@ __model_repository
 *.ckpt
 *.yaml
 *.yml
+
+setup_machine.sh
+
