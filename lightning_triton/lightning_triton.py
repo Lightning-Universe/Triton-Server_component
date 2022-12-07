@@ -25,7 +25,7 @@ from lightning.app.utilities.packaging.cloud_compute import CloudCompute
 from tritonclient.utils import np_to_triton_dtype
 
 from lightning_triton import safe_pickle
-from lightning_triton.base import ServeBase
+from lightning_triton.base import ServeBase, CUDA_DEVICE
 
 logger = Logger(__name__)
 
@@ -228,7 +228,7 @@ class TritonServer(ServeBase, abc.ABC):
 
     def _get_config_file(self) -> str:
         """Create config.pbtxt file specific for triton-python backend"""
-        kind = "GPU" if self.device.type == "cuda" else "CPU"
+        kind = "GPU" if self.device == CUDA_DEVICE else "CPU"
         input_types = self.configure_input_type()
         output_types = self.configure_output_type()
         inputs = []
@@ -291,7 +291,7 @@ class TritonServer(ServeBase, abc.ABC):
         triton_version = "22.10"
         if version < MIN_NVIDIA_DRIVER_REQUIREMENT_MAP[triton_version]:
             raise RuntimeError(
-                f"Your nvidia driver version is {version}."
+                f"Your nvidia driver version is {version}. "
                 f"Lightning Triton {triton_version} requires nvidia driver "
                 f"version >= {MIN_NVIDIA_DRIVER_REQUIREMENT_MAP[triton_version]}"
             )
@@ -301,7 +301,7 @@ class TritonServer(ServeBase, abc.ABC):
 
         Normally, you don't need to override this method.
         """
-        if self.device == torch.device("cuda"):
+        if self.device == CUDA_DEVICE:
             self._check_nvidia_driver_compatibility()
 
         self._setup_model_repository()
@@ -328,7 +328,7 @@ class TritonServer(ServeBase, abc.ABC):
             cmd = f'bash -c "bash /usr/local/bin/docker_script.sh {entrypoint_file}; {TRITON_SERVE_COMMAND}"'
             first = f"docker run -it --shm-size=256m --rm -p {triton_port}:{triton_port} -v {Path.cwd()}:/__model_artifacts/ "
             middle = ""
-            if self.device == torch.device("cuda"):
+            if self.device == CUDA_DEVICE:
                 middle += " --gpus all --env NVIDIA_VISIBLE_DEVICES=all "
             last = f"{base_image} {cmd}"
             docker_cmd = shlex.split(first + middle + last)
