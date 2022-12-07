@@ -19,17 +19,23 @@ cd LAI-Triton-Server-Component/examples/torchvision
 
 ### Step 3
 
-run the component using below command (if you need to run it in cloud, add `--cloud` at the end of the command)
+For running the component locally, use below command
 
 ```bash
 lightning run app serve_torchvision.py --setup
 ```
 
+For running it in cloud, use below command
+
+```bash
+lightning run app serve_torchvision.py --setup --cloud
+```
+
+
 ### Step 4
 
-Once the server is up and running, you should see the client code in the Lightning App UI.
-Run that in a terminal to interact with the server. We have already copied that code
-into `client.py`, incase you need. Run it with
+Once the server is running, Lightning will open a new tab in your browser. To access your server you can use 
+the code snippet shown in that tab or the pre-packaged client.py
 
 ```bash
 python client.py
