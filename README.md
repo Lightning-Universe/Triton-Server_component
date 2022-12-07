@@ -61,9 +61,9 @@ app = L.LightningApp(TorchvisionServer(cloud_compute=cloud_compute))
 ### Run it locally
 
 Since installing Triton can be tricky (and not officially supported) in different operating systems, 
-we use docker internally to run the Triton server. Keep in mind that the docker image is very huge (about 20 GB).
-This component expects the docker is already installed in  your system. Note that you don't need to install docker
-if you are running the component only on cloud.
+we use docker internally to run the Triton server. Keep in mind that the docker image is very huge (about 20 GB) and can
+affect the startup time on the first time you run it. This component expects the docker is already installed in 
+your system. Note that you don't need to install docker if you are running the component only on cloud.
 
 Run it locally using
 
@@ -82,10 +82,15 @@ lightning run app torch_vision_server.py --setup --cloud
 
 ## Known Limitations
 
+This component is still in the early stages of development. Here are some of the known limitations that are being
+worked on: If you have issues with any of these or if you find other issues, please create a 
+[Github issue](https://github.com/Lightning-AI/LAI-Triton-Server-Component/issues/new) so we can prioritise them.
+
 - [ ] When running locally, it requires ctrl-c to be pressed twice to stop all the processes
 - [ ] Running locally requires docker to be installed
 - [ ] Only python backend is supported for the Triton server. This means, a lot of optimizations
-      specific to other backends, like TensorRT for example, cannot be utilized with this component yet. But that is in the making
+      specific to other backends, like TensorRT for example, cannot be utilized with this component yet
 - [ ] Not all the features of Triton are configurable through the component yet.
 - [ ] Only four datatypes are supported at the API level (`string`, `integer`, `float`, `bool`)
-- [ ] Providing a pre-created `model_repository` directly to the component is not supported yet
+- [ ] Providing a pre-created Model Repository to the component is not supported yet. This means if you have an existing
+      model repository, you cannot use it with this component yet
