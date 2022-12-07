@@ -1,6 +1,4 @@
-# LAI-Triton-Serve-Component
-
-Triton Serve Component for lightning.ai
+# Triton Serve on Lightning AI
 
 ## Introduction
 
