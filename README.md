@@ -60,7 +60,7 @@ app = L.LightningApp(TorchvisionServer(cloud_compute=cloud_compute))
 
 ### Install lightning
 
-If you don't have lightning installed yet, Install it using
+If you don't have lightning installed yet, install it using
 
 ```bash
 pip install -U lightning
