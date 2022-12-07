@@ -93,8 +93,8 @@ We have added more examples that uses different datatypes in the example directo
 Follow the instructions for each of those here
 
 - [Stable Diffusion](examples/stable-diffusion/README.md)
-- [Image Classification using Torch vision](examples/style-transfer/README.md)
-- [Audio Transcription using Torch Audio](examples/text-classification/README.md)
+- [Image Classification using Torch vision](examples/torchvision/README.md)
+- [Audio Transcription using Torch Audio](examples/torchaudio/README.md)
 
 
 ## Known Limitations
