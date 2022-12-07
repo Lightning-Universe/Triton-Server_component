@@ -2,14 +2,19 @@
 
 ### Step 1
 
-Clone this repo and cd to examples/torchaudio
-
-### Step 2
-
 Install lightning using
 
 ```bash
 pip install -U lightning
+```
+
+### Step 2
+
+Clone this repo and cd to examples/torchaudio
+
+```bash
+git clone https://github.com/Lightning-AI/LAI-Triton-Server-Component.git
+cd LAI-Triton-Server-Component/examples/torchaudio
 ```
 
 ### Step 3

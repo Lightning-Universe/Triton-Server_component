@@ -58,6 +58,14 @@ cloud_compute = L.CloudCompute("gpu", shm_size=512)
 app = L.LightningApp(TorchvisionServer(cloud_compute=cloud_compute))
 ```
 
+### Install lightning
+
+If you don't have lightning installed yet, Install it using
+
+```bash
+pip install -U lightning
+```
+
 ### Run it locally
 
 Since installing Triton can be tricky (and not officially supported) in different operating systems, 

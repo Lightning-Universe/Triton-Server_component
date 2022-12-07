@@ -2,15 +2,21 @@
 
 ### Step 1
 
-Clone this repo and cd to examples/stable-diffusion
-
-### Step 2
-
 Install lightning using
 
 ```bash
 pip install -U lightning
 ```
+
+### Step 2
+
+Clone this repo and cd to examples/stable-diffusion
+
+```bash
+git clone https://github.com/Lightning-AI/LAI-Triton-Server-Component.git
+cd LAI-Triton-Server-Component/examples/stable-diffusion
+```
+
 
 ### Step 3
 
