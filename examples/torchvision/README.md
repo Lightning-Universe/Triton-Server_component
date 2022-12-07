@@ -19,7 +19,7 @@ cd LAI-Triton-Server-Component/examples/torchvision
 
 ### Step 3
 
-run the component using below command (if you need to run it in clud, add `--cloud` at the end of the command)
+run the component using below command (if you need to run it in cloud, add `--cloud` at the end of the command)
 
 ```bash
 lightning run app serve_torchvision.py --setup
