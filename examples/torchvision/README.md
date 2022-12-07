@@ -1,4 +1,4 @@
-# Serve Image Classifier built with Torch Vision using Lightning Triton Serve
+# Serve an Image Classifier built with Torch Vision using Lightning Triton Serve
 
 ### Step 1
 

@@ -89,7 +89,7 @@ lightning run app torch_vision_server.py --setup --cloud
 
 ## More examples
 
-We have added more examples that uses different datatypes in the example directory. 
+Check out more examples that serve different model types in the example directory. 
 Follow the instructions for each of those here
 
 - [Stable Diffusion](examples/stable-diffusion/README.md)

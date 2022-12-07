@@ -1,4 +1,4 @@
-# Serve Audio transcription built with Torch Audio using Lightning Triton Serve
+# Serve an Audio transcription built with Torch Audio using Lightning Triton Serve
 
 ### Step 1
 
