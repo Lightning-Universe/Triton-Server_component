@@ -7,7 +7,10 @@ for converting api datatypes (`string`, `integer`, `float` etc) to and from Trit
 
 ## What is Triton
 
-< TODO >
+Triton Inference Server is an open-source deep learning inference server designed by Nvidia to make AI model 
+deployment easy and efficient.  It supports multiple model formats and hardware platforms, and help utilize the compute
+efficiently by batching requests and optimizing the model execution. For more details, refer the
+[developer blog](https://developer.nvidia.com/nvidia-triton-inference-server) from Nvidia
 
 ## Let's do an example
 
@@ -16,10 +19,10 @@ We'll use the Triton Serve component in this example to serve a torch vision mod
 Save the following code as `torch_vision_server.py`
 
 ```python
-# !pip install torchvision pillow
+# !pip install torch torchvision pillow
 # !pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 import lightning as L
-import base64, io, torchvision, lightning_triton as lt
+import base64, io, torch, torchvision, lightning_triton as lt
 from PIL import Image
 
 
@@ -57,10 +60,10 @@ app = L.LightningApp(TorchvisionServer(cloud_compute=cloud_compute))
 
 ### Run it locally
 
-Since installing triton can be tricky (and not officially supported) in different operating systems, 
-we use docker internally to run the triton server. This component expects the docker is already installed in
-your system.
-Note that you don't need to install docker if you are running the component only on cloud.
+Since installing Triton can be tricky (and not officially supported) in different operating systems, 
+we use docker internally to run the Triton server. Keep in mind that the docker image is very huge (about 20 GB).
+This component expects the docker is already installed in  your system. Note that you don't need to install docker
+if you are running the component only on cloud.
 
 Run it locally using
 
@@ -77,11 +80,12 @@ lightning run app torch_vision_server.py --setup --cloud
 ```
 
 
-## known Limitations
+## Known Limitations
 
-- [ ] When running locally, ctrl-c not terminating all the processes
+- [ ] When running locally, it requires ctrl-c to be pressed twice to stop all the processes
 - [ ] Running locally requires docker to be installed
-- [ ] Only python backend is supported for the triton server
-- [ ] Not all the features of triton are configurable through the component
-- [ ] Only four datatypes are supported at the API level (string, int, float, bool)
-- [ ] Providing the model_repository directly to the component is not supported yet
+- [ ] Only python backend is supported for the Triton server. This means, a lot of optimizations
+      specific to other backends, like TensorRT for example, cannot be utilized with this component yet. But that is in the making
+- [ ] Not all the features of Triton are configurable through the component yet.
+- [ ] Only four datatypes are supported at the API level (`string`, `integer`, `float`, `bool`)
+- [ ] Providing a pre-created `model_repository` directly to the component is not supported yet
