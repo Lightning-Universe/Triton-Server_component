@@ -30,7 +30,9 @@ from lightning_triton.base import ServeBase
 logger = Logger(__name__)
 
 MODEL_NAME = "lightning-triton"
+
 DISABLE_DRIVER_COMPATIBILITY_CHECK = os.environ.get("DISABLE_DRIVER_COMPATIBILITY_CHECK", "0") == "1"
+
 LIGHTNING_TRITON_BASE_IMAGE = os.getenv(
     "LIGHTNING_TRITON_BASE_IMAGE", "ghcr.io/gridai/lightning-triton:v0.22"
 )
@@ -302,8 +304,9 @@ class TritonServer(ServeBase, abc.ABC):
 
         Normally, you don't need to override this method.
         """
-        if self.device == torch.device("cuda") and not DISABLE_DRIVER_COMPATIBILITY_CHECK:
-            self._check_nvidia_driver_compatibility()
+        if self.device == torch.device("cuda"):
+            if not is_running_in_cloud() and not DISABLE_DRIVER_COMPATIBILITY_CHECK:
+                self._check_nvidia_driver_compatibility()
 
         self._setup_model_repository()
 
