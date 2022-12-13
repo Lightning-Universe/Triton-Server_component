@@ -22,8 +22,9 @@ from lightning.app.utilities.cloud import is_running_in_cloud
 from lightning.app.utilities.network import find_free_network_port
 from lightning.app.utilities.packaging.build_config import BuildConfig
 from lightning.app.utilities.packaging.cloud_compute import CloudCompute
-from tritonclient.utils import np_to_triton_dtype
 
+from lightning_api_access import APIAccessFrontend
+from tritonclient.utils import np_to_triton_dtype
 from lightning_triton import safe_pickle
 from lightning_triton.base import ServeBase
 
@@ -299,6 +300,29 @@ class TritonServer(ServeBase, abc.ABC):
                 f"version >= {MIN_NVIDIA_DRIVER_REQUIREMENT_MAP[triton_version]}"
             )
 
+    def configure_layout(self) -> None:
+        class_name = self.__class__.__name__
+        url = f"{self.url}/predict"
+
+        try:
+            request = self._get_sample_dict_from_datatype(self.configure_input_type())
+            response = self._get_sample_dict_from_datatype(self.configure_output_type())
+        except TypeError:
+            return None
+
+        frontend_payload = {
+            "name": class_name,
+            "url": url,
+            "method": "POST",
+            "response": response,
+            "request": request
+        }
+        code_sample = self.get_code_sample(url)
+        if code_sample:
+            frontend_payload["code_sample"] = code_sample
+
+        return APIAccessFrontend(apis=[frontend_payload])
+
     def run(self, *args: Any, **kwargs: Any) -> Any:
         """Run method takes care of configuring and setting up a FastAPI server behind the scenes.
 
@@ -385,7 +409,6 @@ def _run_fast_api(self, triton_port, url, fastapi_host, fastapi_port):
     # setting and exposing the fast api service that sits in front of triton server
     fastapi_app = FastAPI()
     self._attach_triton_proxy_fn(fastapi_app, triton_port)
-    self._attach_frontend(fastapi_app, url)
     config = uvicorn.Config(fastapi_app, host=fastapi_host, port=fastapi_port, log_level="error")
     server = uvicorn.Server(config=config)
     server.run()
