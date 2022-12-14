@@ -100,6 +100,33 @@ Follow the instructions for each of those here
 - [Audio Transcription using Torch Audio](examples/torchaudio/README.md)
 
 
+## Benchmark
+
+Triton Server is in very early stages of development and is not yet optimized for performance. But we'll be tracking the
+progress with the help of benchmarks provided in this section. Here we are comparing the performance of Triton Server with
+[PythonServer](https://github.com/Lightning-AI/lightning/blob/master/src/lightning_app/components/serve/python_server.py).
+Below given are the results of benchmarking on two different GPU instances using the stable diffusion component. 
+For more details, refer the [benchmarking](https://github.com/Lightning-AI/lightning-diffusion-component/blob/main/benchmarks/README.md)
+section of stable diffusion component.
+
+|      **Device**       | **Server Type** | **Req/Sec** | **Latency** | **Batch Size** |
+|:---------------------:|-----------------|:-----------:|:-----------:|:--------------:|
+| gpu-rtx (g5.2xlarge)  | PythonServer    |    ~0.2     |     7s      |       1        |
+| gpu-rtx (g5.2xlarge)  | TritonServer    |    ~0.1     |    7.3s     |       1        |
+| gpu-fast (p3.2xlarge) | PythonServer    |    ~0.2     |     6s      |       1        |
+| gpu-fast (p3.2xlarge) | TritonServer    |    ~0.1     |    7.5s     |       1        |
+
+
+## Next Steps
+
+At present, our focus is on improving the performance of Triton Server and that includes tackling the following issues
+
+- [ ] Dynamic batching with python backend
+- [ ] Supporting TensorRT backend
+- [ ] Dynamic batching with TensorRT backend
+- [ ] Concurrent model execution
+
+
 ## Known Limitations
 
 This component is still in the early stages of development. Here are some of the known limitations that are being
