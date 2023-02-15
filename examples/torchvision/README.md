@@ -31,10 +31,9 @@ For running it in cloud, use below command
 lightning run app serve_torchvision.py --setup --cloud
 ```
 
-
 ### Step 4
 
-Once the server is running, Lightning will open a new tab in your browser. To access your server you can use 
+Once the server is running, Lightning will open a new tab in your browser. To access your server you can use
 the code snippet shown in that tab or the pre-packaged client.py
 
 ```bash

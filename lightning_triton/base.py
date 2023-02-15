@@ -8,7 +8,6 @@ from fastapi import FastAPI
 from lightning.app import LightningWork
 from lightning.app.utilities.app_helpers import Logger
 from pydantic import BaseModel
-from starlette.staticfiles import StaticFiles
 
 logger = Logger(__name__)
 
@@ -33,19 +32,20 @@ class Image(BaseModel):
 
     @staticmethod
     def request_code_sample(url: str) -> str:
-        return """import base64
+        return f"""
+import base64
 from pathlib import Path
 import requests
 
 img = requests.get("https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/catimage.png").content
 img = base64.b64encode(img).decode("UTF-8")
-response = requests.post('""" + url + """', json={
-    "image": img
-})"""
+response = requests.post('{url}', json=dict(image=img))
+"""
 
     @staticmethod
     def response_code_sample() -> str:
-        return """img = response.json()["image"]
+        return """
+img = response.json()["image"]
 img = base64.b64decode(img.encode("utf-8"))
 Path("response.png").write_bytes(img)
 """
@@ -60,8 +60,7 @@ class Category(BaseModel):
 
     @staticmethod
     def response_code_sample() -> str:
-        return """print("Predicted category is: ", response.json()["category"]) 
-"""
+        return 'print("Predicted category is: ", response.json()["category"])'
 
 
 class Text(BaseModel):
@@ -73,37 +72,19 @@ class Text(BaseModel):
 
     @staticmethod
     def request_code_sample(url: str) -> str:
-        return """import base64
+        return f"""
+import base64
 from pathlib import Path
 import requests
 
-response = requests.post('""" + url + """', json={
-    "text": "A portrait of a person looking away from the camera"
-})
+response = requests.post('{url}', json=dict(
+    text="A portrait of a person looking away from the camera"
+))
 """
 
 
 class WaveForm(BaseModel):
     waveform: Optional[str]
-#
-#     @staticmethod
-#     def get_sample_data() -> Dict[Any, Any]:
-#         url = "https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/audio_file.wav"
-#         audio = requests.get(url).content
-#         audio = base64.b64encode(audio).decode("UTF-8")
-#         return {"waveform": audio}
-#
-#     @staticmethod
-#     def request_code_sample(url: str) -> str:
-#         return """import base64
-# from pathlib import Path
-# import requests
-#
-# img = requests.get("https://raw.githubusercontent.com/Lightning-AI/LAI-Triton-Server-Component/main/audio_file.wav").content
-# img = base64.b64encode(img).decode("UTF-8")
-# response = requests.post('""" + url + """', json={
-#     "image": img
-# })"""
 
 
 class ServeBase(LightningWork, abc.ABC):
@@ -126,9 +107,7 @@ class ServeBase(LightningWork, abc.ABC):
 
     @property
     def device(self):
-        return (
-            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-        )
+        return torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     def configure_input_type(self) -> type:
         """Override this method to configure the input type for the API.
@@ -152,8 +131,8 @@ class ServeBase(LightningWork, abc.ABC):
         return datatype
 
     def setup(self, *args, **kwargs) -> None:
-        """This method is called before the server starts. Override this if you need to download the model or
-        initialize the weights, setting up pipelines etc.
+        """This method is called before the server starts. Override this if you need to download the model or initialize
+        the weights, setting up pipelines etc.
 
         Note that this will be called exactly once on every work machines. So if you have multiple machines for serving,
         this will be called on each of them.
@@ -172,10 +151,7 @@ class ServeBase(LightningWork, abc.ABC):
         input_type: Any = self.configure_input_type()
         output_type: Any = self.configure_output_type()
 
-        if not (
-                hasattr(input_type, "request_code_sample") and
-                hasattr(output_type, "response_code_sample")
-        ):
+        if not (hasattr(input_type, "request_code_sample") and hasattr(output_type, "response_code_sample")):
             return None
         return f"{input_type.request_code_sample(url)}\n{output_type.response_code_sample()}"
 
@@ -208,4 +184,3 @@ class ServeBase(LightningWork, abc.ABC):
                 return self.predict(request)
 
         fastapi_app.post("/predict", response_model=output_type)(infer_fn)
-

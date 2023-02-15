@@ -2,9 +2,15 @@
 # !pip install 'git+https://github.com/Lightning-AI/stablediffusion.git@lit'
 # !curl https://raw.githubusercontent.com/Lightning-AI/stablediffusion/main/configs/stable-diffusion/v2-inference-v.yaml -o v2-inference-v.yaml
 
+import base64
+import io
+import os
+
 import lightning as L
-import base64, io, os, torch, lightning_triton as lt
+import torch
 from ldm.lightning import LightningStableDiffusion, PromptDataset
+
+import lightning_triton as lt
 
 
 class StableDiffusionServer(lt.TritonServer):
@@ -37,10 +43,11 @@ class StableDiffusionServer(lt.TritonServer):
             torch.cuda.empty_cache()
 
     def predict(self, request):
-        image = self._trainer.predict(
+        imgs_ = self._trainer.predict(
             self._model,
             torch.utils.data.DataLoader(PromptDataset([request.text])),
-        )[0][0]
+        )
+        image = imgs_[0][0]
         buffer = io.BytesIO()
         image.save(buffer, format="PNG")
         img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")

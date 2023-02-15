@@ -1,12 +1,11 @@
-import multiprocessing
-import time
-
-import sys
 import abc
+import multiprocessing
 import os
 import shlex
 import shutil
 import subprocess
+import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -22,9 +21,9 @@ from lightning.app.utilities.cloud import is_running_in_cloud
 from lightning.app.utilities.network import find_free_network_port
 from lightning.app.utilities.packaging.build_config import BuildConfig
 from lightning.app.utilities.packaging.cloud_compute import CloudCompute
-
 from lightning_api_access import APIAccessFrontend
 from tritonclient.utils import np_to_triton_dtype
+
 from lightning_triton import safe_pickle
 from lightning_triton.base import ServeBase
 
@@ -34,9 +33,7 @@ MODEL_NAME = "lightning-triton"
 
 DISABLE_DRIVER_COMPATIBILITY_CHECK = os.environ.get("DISABLE_DRIVER_COMPATIBILITY_CHECK", "0") == "1"
 
-LIGHTNING_TRITON_BASE_IMAGE = os.getenv(
-    "LIGHTNING_TRITON_BASE_IMAGE", "ghcr.io/gridai/lightning-triton:v0.22"
-)
+LIGHTNING_TRITON_BASE_IMAGE = os.getenv("LIGHTNING_TRITON_BASE_IMAGE", "ghcr.io/gridai/lightning-triton:v0.22")
 # https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html
 MIN_NVIDIA_DRIVER_REQUIREMENT_MAP = {"22.10": "520"}
 
@@ -157,14 +154,10 @@ def pydantic_to_triton_dtype_string(pydantic_obj_string):
 
 class TritonServer(ServeBase, abc.ABC):
     def __init__(self, *args, max_batch_size=8, backend="python", **kwargs):
-        cloud_build_config = kwargs.get(
-            "cloud_build_config", BuildConfig(image=LIGHTNING_TRITON_BASE_IMAGE)
-        )
+        cloud_build_config = kwargs.get("cloud_build_config", BuildConfig(image=LIGHTNING_TRITON_BASE_IMAGE))
         compute_config = kwargs.get("cloud_compute", CloudCompute("cpu", shm_size=512))
         if compute_config.shm_size < 256:
-            raise ValueError(
-                "Triton expects the shared memory size (shm_size) to be at least 256MB"
-            )
+            raise ValueError("Triton expects the shared memory size (shm_size) to be at least 256MB")
         kwargs["cloud_build_config"] = cloud_build_config
         kwargs["cloud_compute"] = compute_config
         super().__init__(
@@ -208,9 +201,7 @@ class TritonServer(ServeBase, abc.ABC):
                 val = [getattr(request, property_name)]
                 dtype = pydantic_to_numpy_dtype(property["type"])
                 arr = np.array(val, dtype=dtype).reshape((-1, 1))
-                data = httpclient.InferInput(
-                    property_name, arr.shape, np_to_triton_dtype(arr.dtype)
-                )
+                data = httpclient.InferInput(property_name, arr.shape, np_to_triton_dtype(arr.dtype))
                 data.set_data_from_numpy(arr)
                 inputs.append(data)
             for property_name, property in output_type.schema()["properties"].items():
@@ -231,7 +222,7 @@ class TritonServer(ServeBase, abc.ABC):
         fastapi_app.post("/predict", response_model=output_type)(proxy_fn)
 
     def _get_config_file(self) -> str:
-        """Create config.pbtxt file specific for triton-python backend"""
+        """Create config.pbtxt file specific for triton-python backend."""
         kind = "GPU" if self.device.type == "cuda" else "CPU"
         input_types = self.configure_input_type()
         output_types = self.configure_output_type()
@@ -270,9 +261,7 @@ class TritonServer(ServeBase, abc.ABC):
         repo_path.mkdir(parents=True, exist_ok=True)
 
         # setting the model file
-        (repo_path / "__lightningapp_triton_model_file.py").write_text(
-            triton_model_file_template
-        )
+        (repo_path / "__lightningapp_triton_model_file.py").write_text(triton_model_file_template)
 
         with open(repo_path / "__lightning_work.pkl", "wb+") as f:
             safe_pickle.dump(self, f)
@@ -310,13 +299,7 @@ class TritonServer(ServeBase, abc.ABC):
         except TypeError:
             return None
 
-        frontend_payload = {
-            "name": class_name,
-            "url": url,
-            "method": "POST",
-            "response": response,
-            "request": request
-        }
+        frontend_payload = {"name": class_name, "url": url, "method": "POST", "response": response, "request": request}
         code_sample = self.get_code_sample(url)
         if code_sample:
             frontend_payload["code_sample"] = code_sample
@@ -351,8 +334,9 @@ class TritonServer(ServeBase, abc.ABC):
                     entrypoint_file = sys.argv[i + 2]
                     break
             else:
-                raise ValueError("Could not find the entrypoint file. Please create an issue "
-                                 "on github with a reproducible script")
+                raise ValueError(
+                    "Could not find the entrypoint file. Please create an issue " "on github with a reproducible script"
+                )
             cmd = f'bash -c "bash /usr/local/bin/docker_script.sh {entrypoint_file}; {TRITON_SERVE_COMMAND}"'
             first = f"docker run -it --shm-size=256m --rm -p {triton_port}:{triton_port} -v {Path.cwd()}:/__model_artifacts/ "
             middle = ""
@@ -386,12 +370,10 @@ class TritonServer(ServeBase, abc.ABC):
                 url,
                 self.host,
                 self.port,
-            )
+            ),
         )
         fastapi_proc.start()
-        logger.info(
-            f"Your app has started. View it in your browser: http://{self.host}:{self.port}"
-        )
+        logger.info(f"Your app has started. View it in your browser: http://{self.host}:{self.port}")
 
         self._triton_server_process = _triton_server_process
         self._fastapi_process = fastapi_proc

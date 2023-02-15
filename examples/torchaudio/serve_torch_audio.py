@@ -2,7 +2,10 @@
 # !pip install lightning_triton@git+https://github.com/Lightning-AI/LAI-Triton-Serve-Component.git
 
 import lightning as L
-import lightning_triton as lt, torch, torchaudio
+import torch
+import torchaudio
+
+import lightning_triton as lt
 
 
 class GreedyCTCDecoder(torch.nn.Module):
@@ -27,10 +30,12 @@ class GreedyCTCDecoder(torch.nn.Module):
 
 class TorchAudioServe(lt.TritonServer):
     def __init__(self, input_type=lt.WaveForm, output_type=lt.Text):
-        super().__init__(input_type=input_type,
-                         output_type=output_type,
-                         cloud_compute=L.CloudCompute("gpu-rtx", shm_size=512),
-                         max_batch_size=8)
+        super().__init__(
+            input_type=input_type,
+            output_type=output_type,
+            cloud_compute=L.CloudCompute("gpu-rtx", shm_size=512),
+            max_batch_size=8,
+        )
         self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self._model = None
 

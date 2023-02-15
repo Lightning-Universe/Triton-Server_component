@@ -19,7 +19,7 @@ cd LAI-Triton-Server-Component/examples/torchaudio
 
 ### Step 3
 
-For running the component locally, use below command 
+For running the component locally, use below command
 
 ```bash
 lightning run app serve_torch_audio.py --setup
